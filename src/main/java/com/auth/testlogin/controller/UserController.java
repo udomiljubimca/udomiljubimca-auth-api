@@ -1,6 +1,6 @@
-package com.auth.login.controller;
+package com.auth.testlogin.controller;
 
-import com.auth.login.service.KeyCloakService;
+import com.auth.testlogin.service.KeyCloakService;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;

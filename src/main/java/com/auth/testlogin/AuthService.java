@@ -1,4 +1,4 @@
-package com.auth.login;
+package com.auth.testlogin;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

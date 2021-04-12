@@ -1,7 +1,7 @@
-package com.auth.login.service;
+package com.auth.testlogin.service;
 
-import com.auth.login.model.UserCredentials;
-import com.auth.login.model.UserDTO;
+import com.auth.testlogin.model.UserCredentials;
+import com.auth.testlogin.model.UserDTO;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;

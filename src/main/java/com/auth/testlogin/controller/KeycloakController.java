@@ -1,8 +1,8 @@
-package com.auth.login.controller;
+package com.auth.testlogin.controller;
 
-import com.auth.login.model.UserCredentials;
-import com.auth.login.model.UserDTO;
-import com.auth.login.service.KeyCloakService;
+import com.auth.testlogin.model.UserCredentials;
+import com.auth.testlogin.model.UserDTO;
+import com.auth.testlogin.service.KeyCloakService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.example.testlogin.model;
+package com.auth.login.model;
 
 public class UserCredentials {
 

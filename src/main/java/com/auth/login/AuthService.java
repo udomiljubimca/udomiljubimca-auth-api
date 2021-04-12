@@ -1,13 +1,13 @@
-package com.example.testlogin;
+package com.auth.login;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TestloginApplication {
+public class AuthService {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TestloginApplication.class, args);
+		SpringApplication.run(AuthService.class, args);
 	}
 
 }

@@ -1,7 +1,7 @@
 package com.auth.testlogin.controller;
 
+import com.auth.testlogin.model.TokenDto;
 import com.auth.testlogin.model.UserCredentials;
-import com.auth.testlogin.model.UserDTO;
 import com.auth.testlogin.service.KeyCloakService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,15 +21,12 @@ public class KeycloakController {
 	 */
 
 	@RequestMapping(value = "/token", method = RequestMethod.POST)
-	public ResponseEntity<?> getTokenUsingCredentials(@RequestBody UserCredentials userCredentials) {
+	public ResponseEntity<?> getTokenUsingCredentials(@RequestBody UserCredentials userCredentials) throws Exception {
 
-		String responseToken = null;
+		TokenDto responseToken = null;
 		try {
-
 			responseToken = keyClockService.getToken(userCredentials);
-
 		} catch (Exception e) {
-
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
@@ -56,27 +53,6 @@ public class KeycloakController {
 		}
 
 		return new ResponseEntity<>(responseToken, HttpStatus.OK);
-
-	}
-
-	/*
-	 * Creating user in keycloak passing UserDTO contains username, emailid,
-	 * password, firtname, lastname
-	 */
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
-		try {
-
-			keyClockService.createUserInKeyCloak(userDTO);
-			return new ResponseEntity<>(HttpStatus.OK);
-		}
-
-		catch (Exception ex) {
-
-			ex.printStackTrace();
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-		}
 
 	}
 }

@@ -7,7 +7,6 @@ public class TokenDto {
     private String refreshToken;
     private String expires_in;
     private String scope;
-    private String userId;
 
 
     public String getAccessToken() {
@@ -50,14 +49,6 @@ public class TokenDto {
         this.scope = scope;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     @Override
     public String toString() {
         return "TokenDto{" +
@@ -66,7 +57,6 @@ public class TokenDto {
                 ", refreshToken='" + refreshToken + '\'' +
                 ", expires_in='" + expires_in + '\'' +
                 ", scope='" + scope + '\'' +
-                ", userId='" + userId + '\'' +
                 '}';
     }
 }

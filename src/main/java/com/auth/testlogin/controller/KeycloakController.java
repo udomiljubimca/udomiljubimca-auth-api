@@ -19,11 +19,11 @@ public class KeycloakController {
 	 * Get token for the first time when user log in. We need to pass
 	 * credentials only once. Later communication will be done by sending token.
 	 */
-
+	// TODO: Important for Exception Handlers !
 	@RequestMapping(value = "/token", method = RequestMethod.POST)
 	public ResponseEntity<?> getTokenUsingCredentials(@RequestBody UserCredentials userCredentials) throws Exception {
 
-		TokenDto responseToken = null;
+		TokenDto responseToken;
 		try {
 			responseToken = keyClockService.getToken(userCredentials);
 		} catch (Exception e) {
@@ -33,7 +33,6 @@ public class KeycloakController {
 		return new ResponseEntity<>(responseToken, HttpStatus.OK);
 
 	}
-
 	/*
 	 * When access token get expired than send refresh token to get new access
 	 * token. We will receive new refresh token also in this response.Update
@@ -44,14 +43,12 @@ public class KeycloakController {
 
 		String responseToken = null;
 		try {
-
 			responseToken = keyClockService.getByRefreshToken(refreshToken);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-
 		return new ResponseEntity<>(responseToken, HttpStatus.OK);
 
 	}

@@ -48,61 +48,28 @@ public class KeyCloakService {
     @Autowired
     private RestTemplate restTemplate;
 
+    // Get Token
     public TokenDto getToken(UserCredentials userCredentials) throws Exception {
 
-        TokenDto tokenDto = new TokenDto();
-        String uri = AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/token";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));
-
-        MultiValueMap<String, String> mapForm = new LinkedMultiValueMap<>();
-        mapForm.add("grant_type", "password");
-        mapForm.add("client_id", CLIENTID);
-        mapForm.add("username", userCredentials.getUsername());
-        mapForm.add("password", userCredentials.getPassword());
-        mapForm.add("client_secret", SECRETKEY);
+        TokenDto tokenDto;
         try {
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
-            ResponseEntity<Object> response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
-            LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
+            MultiValueMap<String, String> mapForm = new LinkedMultiValueMap<>();
+            mapForm.add("grant_type", "password");
+            mapForm.add("client_id", CLIENTID);
+            mapForm.add("username", userCredentials.getUsername());
+            mapForm.add("password", userCredentials.getPassword());
+            mapForm.add("client_secret", SECRETKEY);
 
-            if (map != null) {
-                tokenDto.setAccessToken(map.get("access_token").toString());
-                tokenDto.setTokenType(map.get("token_type").toString());
-                tokenDto.setRefreshToken(map.get("refresh_token").toString());
-                tokenDto.setExpires_in(map.get("expires_in").toString());
-                tokenDto.setScope(map.get("scope").toString());
-            } else {
-                throw new CredentialException("Invalid credentials!");
-            }
+            tokenDto = exchange(mapForm);
+
             return tokenDto;
+
         } catch (Exception e) {
             throw new CredentialException("Invalid credentials!");
         }
     }
 
-//    public String getToken(UserCredentials userCredentials) {
-//        String responseToken = null;
-//        try {
-//
-//            String username = userCredentials.getUsername();
-//
-//            List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-//            urlParameters.add(new BasicNameValuePair("grant_type", "password"));
-//            urlParameters.add(new BasicNameValuePair("client_id", CLIENTID));
-//            urlParameters.add(new BasicNameValuePair("username", username));
-//            urlParameters.add(new BasicNameValuePair("password", userCredentials.getPassword()));
-//            urlParameters.add(new BasicNameValuePair("client_secret", SECRETKEY));
-//
-//            responseToken = sendPost(urlParameters);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        return responseToken;
-//    }
-
+    // Should be updated with exchange method instead sendPost
     public String getByRefreshToken(String refreshToken) {
         String responseToken = null;
         try {
@@ -120,8 +87,7 @@ public class KeyCloakService {
         return responseToken;
     }
 
-    // after logout user from the keycloak system. No new access token will be
-    // issued.
+    // after logout user from the keycloak system. No new access token will be issued
     public void logoutUser(String userId) {
 
         UsersResource userRessource = getKeycloakUserResource();
@@ -130,6 +96,7 @@ public class KeyCloakService {
     }
 
     // Reset passowrd
+    // Should be tested once when Principal available on client side
     public void resetPassword(String newPassword, String userId) {
 
         UsersResource userResource = getKeycloakUserResource();
@@ -147,8 +114,8 @@ public class KeyCloakService {
 
     private UsersResource getKeycloakUserResource() {
 
-        Keycloak kc = KeycloakBuilder.builder().serverUrl(AUTHURL).realm("master").username("admin").password("admin")
-                .clientId("admin-cli").resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
+        Keycloak kc = KeycloakBuilder.builder().serverUrl(AUTHURL).realm(REALM).username("admin").password("admin")
+                .clientId(CLIENTID).resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
                 .build();
 
         RealmResource realmResource = kc.realm(REALM);
@@ -157,6 +124,33 @@ public class KeyCloakService {
         return userRessource;
     }
 
+    // New method for exchange using Rest Template
+    private TokenDto exchange(MultiValueMap<String, String> mapForm) {
+
+        TokenDto tokenDto = new TokenDto();
+
+        String uri = AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/token";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
+        ResponseEntity<Object> response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
+        LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
+
+        if (map != null) {
+            tokenDto.setAccessToken(map.get("access_token").toString());
+            tokenDto.setTokenType(map.get("token_type").toString());
+            tokenDto.setRefreshToken(map.get("refresh_token").toString());
+            tokenDto.setExpires_in(map.get("expires_in").toString());
+            tokenDto.setScope(map.get("scope").toString());
+        } else {
+            return null;
+        }
+        return tokenDto;
+
+    }
+
+    //This method is deprecated and should be updated on exchange but here is until we testing
     private String sendPost(List<NameValuePair> urlParameters) throws Exception {
 
         HttpClient client = HttpClientBuilder.create().build();

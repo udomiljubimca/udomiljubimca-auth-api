@@ -67,7 +67,6 @@
 			<version>3.0.19.Final</version>
 		</dependency>
 
-
 	</dependencies>
 
 	<build>

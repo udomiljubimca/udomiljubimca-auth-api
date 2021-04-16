@@ -1,4 +1,4 @@
-package com.auth.testlogin.model;
+package com.auth.testlogin.model.dto;
 
 public class TokenDto {
 
@@ -7,8 +7,7 @@ public class TokenDto {
     private String refreshToken;
     private String expires_in;
     private String scope;
-
-
+    private UserInfoDto userInfo;
     public String getAccessToken() {
         return accessToken;
     }
@@ -49,6 +48,14 @@ public class TokenDto {
         this.scope = scope;
     }
 
+    public UserInfoDto getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfoDto userInfo) {
+        this.userInfo = userInfo;
+    }
+
     @Override
     public String toString() {
         return "TokenDto{" +
@@ -57,6 +64,7 @@ public class TokenDto {
                 ", refreshToken='" + refreshToken + '\'' +
                 ", expires_in='" + expires_in + '\'' +
                 ", scope='" + scope + '\'' +
+                ", userInfo=" + userInfo +
                 '}';
     }
 }

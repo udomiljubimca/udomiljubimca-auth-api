@@ -1,7 +1,8 @@
 package com.auth.testlogin.service;
 
-import com.auth.testlogin.model.TokenDto;
+import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.model.UserCredentials;
+import com.auth.testlogin.model.dto.UserInfoDto;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -23,12 +24,14 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.security.auth.login.CredentialException;
+import javax.servlet.ServletRequest;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import static org.keycloak.admin.client.Keycloak.getInstance;
 
 @Component
 public class KeyCloakService {
@@ -49,7 +52,7 @@ public class KeyCloakService {
     private RestTemplate restTemplate;
 
     // Get Token
-    public TokenDto getToken(UserCredentials userCredentials) throws Exception {
+    public TokenDto getToken(UserCredentials userCredentials, ServletRequest request) throws Exception {
 
         TokenDto tokenDto;
         try {
@@ -60,13 +63,32 @@ public class KeyCloakService {
             mapForm.add("password", userCredentials.getPassword());
             mapForm.add("client_secret", SECRETKEY);
 
+            //get token
             tokenDto = exchange(mapForm);
 
+            //get user info by access token
+            if (tokenDto != null) {
+                tokenDto.setUserInfo(getUserInfo(tokenDto.getAccessToken()));
+            }
             return tokenDto;
 
         } catch (Exception e) {
-            throw new CredentialException("Invalid credentials!");
+            throw new Exception(e.getMessage());
         }
+    }
+
+    public UserInfoDto getUserInfo(String token) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        HttpEntity<String> entity = new HttpEntity<>(token, headers);
+
+        UserInfoDto userInfoDto = restTemplate.exchange(
+                AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/userinfo",
+                HttpMethod.GET, entity, UserInfoDto.class).getBody();
+
+        return userInfoDto;
     }
 
     // Should be updated with exchange method instead sendPost

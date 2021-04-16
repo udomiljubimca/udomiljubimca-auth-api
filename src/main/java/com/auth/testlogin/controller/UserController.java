@@ -1,6 +1,6 @@
-package com.example.testlogin.controller;
+package com.auth.testlogin.controller;
 
-import com.example.testlogin.service.KeyCloakService;
+import com.auth.testlogin.service.KeyCloakService;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.representations.AccessToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +20,6 @@ public class UserController {
 
 	@Autowired
 	KeyCloakService keyCloakService;
-
-	@RequestMapping(value = "/hello", method = RequestMethod.GET)
-	public ResponseEntity<?> sayHello() {
-
-		return new ResponseEntity<>("Hi!, you are auhorized to view this response!", HttpStatus.OK);
-
-	}
 
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
 	public ResponseEntity<?> logoutUser(HttpServletRequest request) {

@@ -3,17 +3,21 @@ package com.auth.testlogin.controller;
 import com.auth.testlogin.service.KeyCloakService;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.NotAuthorizedException;
 
+/**
+ * @author Djordje
+ * @version 1.0
+ */
 @RestController
 @RequestMapping(value = "/user")
 public class UserController {
@@ -37,17 +41,20 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/update/password", method = RequestMethod.GET)
-	public ResponseEntity<?> updatePassword(HttpServletRequest request, String newPassword) {
+	public ResponseEntity<?> updatePassword(HttpServletRequest request,
+											@RequestParam(name = "userId") String userId,
+											@RequestBody CredentialRepresentation credentialRepresentation) {
 
-		request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		String header = request.getHeader("Authorization");
 
-		AccessToken token = ((KeycloakPrincipal<?>) request.getUserPrincipal()).getKeycloakSecurityContext().getToken();
+		if (header == null || !header.startsWith("Bearer ")) {
+			throw new NotAuthorizedException("No JWT token found in request headers");
+		}
+		String authToken = header.substring(7);
 
-		String userId = token.getSubject();
+		keyCloakService.resetPassword(credentialRepresentation,authToken, userId);
 
-		keyCloakService.resetPassword(newPassword, userId);
-
-		return new ResponseEntity<>("Hi!, your password has been successfully updated!", HttpStatus.OK);
+		return new ResponseEntity<>("Your password has been successfully updated!", HttpStatus.OK);
 
 	}
 

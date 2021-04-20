@@ -1,13 +1,9 @@
 package com.auth.testlogin.service;
 
 import com.auth.testlogin.model.UserCredentials;
+import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.model.dto.UserInfoDto;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.KeycloakBuilder;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,7 +59,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             }
             return tokenDto;
 
-        } catch (Exception e) {
+        }catch (Exception e) {
             throw new Exception(e.getMessage());
         }
     }
@@ -93,6 +89,10 @@ public class KeyCloakServiceImpl implements KeyCloakService {
 
             tokenDto = exchange(mapForm);
 
+            if (tokenDto != null) {
+                tokenDto.setUserInfo(getUserInfo(tokenDto.getAccessToken()));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -100,40 +100,47 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     }
 
     // after logout user from the keycloak system. No new access token will be issued
-    public void logoutUser(String userId) {
+    public void logoutUser(String refreshToken) {
 
-        UsersResource userRessource = getKeycloakUserResource();
-        userRessource.get(userId).logout();
+        try {
+            MultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
+            requestParams.add("client_id", CLIENTID);
+            requestParams.add("client_secret", SECRETKEY);
+            requestParams.add("refresh_token", refreshToken.substring(7));
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestParams, headers);
+
+            String url = AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/logout";
+
+            restTemplate.postForEntity(url, request, Object.class);
+
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     // Reset passowrd
-    public void resetPassword(CredentialRepresentation cr, String token, String userId) {
+    public void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<CredentialRepresentation> entity = new HttpEntity<>(cr, headers);
+        CredentialRepresentation cr = new CredentialRepresentation();
         cr.setType(CredentialRepresentation.PASSWORD);
+        cr.setTemporary(false);
+        cr.setValue(resetPasswordDto.getPassword());
+        HttpEntity<CredentialRepresentation> entity = new HttpEntity<>(cr, headers);
 
-        String fedUserId = getUserInfo(token).getSub();
+        // Test purpose
+        // String fedUserId = getUserInfo(token).getSub();
 
-        restTemplate.put(AUTHURL + "/admin/realms/" + REALM + "/users/" + fedUserId + "/reset-password",
+        restTemplate.put(AUTHURL + "/admin/realms/" + REALM + "/users/" + userId + "/reset-password",
                 entity
         );
 
-    }
-
-    private UsersResource getKeycloakUserResource() {
-
-        Keycloak kc = KeycloakBuilder.builder().serverUrl(AUTHURL).realm(REALM).username("admin").password("admin")
-                .clientId("admin-cli").resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
-                .build();
-
-        RealmResource realmResource = kc.realm(REALM);
-        UsersResource userRessource = realmResource.users();
-
-        return userRessource;
     }
 
     // New method for exchange using Rest Template

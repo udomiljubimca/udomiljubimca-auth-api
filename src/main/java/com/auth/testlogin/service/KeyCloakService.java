@@ -1,6 +1,7 @@
 package com.auth.testlogin.service;
 
 import com.auth.testlogin.model.UserCredentials;
+import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
 import org.keycloak.representations.idm.CredentialRepresentation;
 
@@ -16,5 +17,5 @@ public interface KeyCloakService {
 
     void logoutUser(String userId);
 
-    void resetPassword(CredentialRepresentation cr, String token, String userId);
+    void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId);
 }

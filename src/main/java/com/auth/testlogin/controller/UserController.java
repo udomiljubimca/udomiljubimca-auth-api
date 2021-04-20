@@ -1,18 +1,16 @@
 package com.auth.testlogin.controller;
 
+import com.auth.testlogin.logging.Loggable;
+import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.service.KeyCloakService;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.idm.CredentialRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotAuthorizedException;
+import java.util.Optional;
 
 /**
  * @author Djordje
@@ -26,24 +24,36 @@ public class UserController {
 	KeyCloakService keyCloakService;
 
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	@Loggable
 	public ResponseEntity<?> logoutUser(HttpServletRequest request) {
 
-		request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		if (request == null) {
+			return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+		}
 
-		AccessToken token = ((KeycloakPrincipal<?>) request.getUserPrincipal()).getKeycloakSecurityContext().getToken();
+		String header = request.getHeader("Authorization");
 
-		String userId = token.getSubject();
-
-		keyCloakService.logoutUser(userId);
+		keyCloakService.logoutUser(header);
 
 		return new ResponseEntity<>("Hi!, you have logged out successfully!", HttpStatus.OK);
 
 	}
 
 	@RequestMapping(value = "/update/password", method = RequestMethod.GET)
+	@Loggable
 	public ResponseEntity<?> updatePassword(HttpServletRequest request,
 											@RequestParam(name = "userId") String userId,
-											@RequestBody CredentialRepresentation credentialRepresentation) {
+											@RequestBody ResetPasswordDto resetPasswordDto) {
+
+		if (request == null) {
+			return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+		}
+		if (userId == null) {
+			return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+		}
+		if (resetPasswordDto == null || (!resetPasswordDto.getPassword().equals(resetPasswordDto.getConfirm()))) {
+			return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+		}
 
 		String header = request.getHeader("Authorization");
 
@@ -52,7 +62,7 @@ public class UserController {
 		}
 		String authToken = header.substring(7);
 
-		keyCloakService.resetPassword(credentialRepresentation,authToken, userId);
+		keyCloakService.resetPassword(resetPasswordDto,authToken, userId);
 
 		return new ResponseEntity<>("Your password has been successfully updated!", HttpStatus.OK);
 

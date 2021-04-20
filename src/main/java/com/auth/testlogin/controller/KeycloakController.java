@@ -1,8 +1,8 @@
 package com.auth.testlogin.controller;
 
+import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.TokenDto;
-import com.auth.testlogin.model.dto.UserInfoDto;
 import com.auth.testlogin.service.KeyCloakServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +29,7 @@ public class KeycloakController {
      */
     // TODO: Important for Exception Handlers !
     @RequestMapping(value = "/token", method = RequestMethod.POST)
+    @Loggable
     public ResponseEntity<?> getTokenUsingCredentials(@RequestBody UserCredentials userCredentials, ServletRequest request)
             throws Exception {
 
@@ -38,8 +39,8 @@ public class KeycloakController {
         }
 
         // TODO: 18.4.21. Credential validation
-        if (userCredentials == null || userCredentials.getPassword() == null || userCredentials.getPassword().equals("") ||
-                userCredentials.getUsername() == null || userCredentials.getUsername().equals("")) {
+        if (userCredentials == null || userCredentials.getPassword() == null || userCredentials.getPassword().equals("")
+                || userCredentials.getUsername() == null || userCredentials.getUsername().equals("")) {
 
             return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
         }
@@ -51,23 +52,13 @@ public class KeycloakController {
         return new ResponseEntity<>(responseToken, HttpStatus.OK);
 
     }
-
-    @GetMapping(value = "/userInfo/{token}")
-    public ResponseEntity<?> getUserInfo(@PathVariable String token) {
-
-        UserInfoDto userInfoDto;
-
-        userInfoDto = keyClockService.getUserInfo(token);
-
-        return new ResponseEntity<>(userInfoDto, HttpStatus.OK);
-    }
-
     /*
      * When access token get expired than send refresh token to get new access
      * token. We will receive new refresh token also in this response.Update
      * client cookie with updated refresh and access token
      */
     @RequestMapping(value = "/refreshtoken", method = RequestMethod.GET)
+    @Loggable
     public ResponseEntity<?> getTokenUsingRefreshToken(@RequestHeader(value = "Authorization") String refreshToken) {
 
         TokenDto responseToken;

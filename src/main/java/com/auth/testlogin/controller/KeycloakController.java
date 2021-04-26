@@ -39,7 +39,6 @@ public class KeycloakController {
             return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
         }
 
-        // TODO: 18.4.21. Credential validation
         if (userCredentials == null || userCredentials.getPassword() == null || userCredentials.getPassword().equals("")
                 || userCredentials.getUsername() == null || userCredentials.getUsername().equals("")) {
             throw new WrongCredentialsException("Username or password you applied is not correct. Please try again.");
@@ -52,6 +51,7 @@ public class KeycloakController {
         return new ResponseEntity<>(responseToken, HttpStatus.OK);
 
     }
+
     /*
      * When access token get expired than send refresh token to get new access
      * token. We will receive new refresh token also in this response.Update
@@ -64,7 +64,7 @@ public class KeycloakController {
         TokenDto responseToken;
         try {
             responseToken = keyClockService.getByRefreshToken(refreshToken);
-
+            // TODO: 26.4.21. Catch our exceptions
         } catch (Exception e) {
 
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

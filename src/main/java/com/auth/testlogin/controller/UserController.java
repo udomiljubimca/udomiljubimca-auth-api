@@ -20,6 +20,8 @@ import java.util.Optional;
 @RequestMapping(value = "/user")
 public class UserController {
 
+	// TODO: 26.4.21. Catch Errors on logout and update/password
+
 	@Autowired
 	KeyCloakService keyCloakService;
 

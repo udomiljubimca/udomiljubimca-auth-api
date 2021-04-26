@@ -1,5 +1,6 @@
 package com.auth.testlogin.service;
 
+import com.auth.testlogin.exceptions.WrongCredentialsException;
 import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
@@ -39,7 +40,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     private RestTemplate restTemplate;
 
     // Get Token
-    public TokenDto getToken(UserCredentials userCredentials, ServletRequest request) throws Exception {
+    public TokenDto getToken(UserCredentials userCredentials, ServletRequest request) {
 
         TokenDto tokenDto;
         try {
@@ -51,16 +52,18 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             mapForm.add("client_secret", SECRETKEY);
 
             //get token
+            System.out.println("get token");
             tokenDto = exchange(mapForm);
 
             //get user info by access token
+            System.out.println("user info");
             if (tokenDto != null) {
                 tokenDto.setUserInfo(getUserInfo(tokenDto.getAccessToken()));
             }
             return tokenDto;
 
-        }catch (Exception e) {
-            throw new Exception(e.getMessage());
+        } catch (Exception e) {
+            throw new WrongCredentialsException("Credentials are not valid, please try again!");
         }
     }
 
@@ -148,13 +151,18 @@ public class KeyCloakServiceImpl implements KeyCloakService {
 
         TokenDto tokenDto = new TokenDto();
 
+        ResponseEntity<Object> response = null;
         String uri = AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/token";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));
-
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
+
         // TODO: 18.4.21. Response model mapping
-        ResponseEntity<Object> response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
+        try {
+            response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
+        } catch (Exception e) {
+            throw new WrongCredentialsException(e.getMessage());
+        }
         LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
 
         if (map != null) {
@@ -167,7 +175,5 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             return null;
         }
         return tokenDto;
-
     }
-
 }

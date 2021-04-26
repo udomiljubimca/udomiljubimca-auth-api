@@ -1,5 +1,6 @@
 package com.auth.testlogin.controller;
 
+import com.auth.testlogin.exceptions.WrongCredentialsException;
 import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.TokenDto;
@@ -41,8 +42,7 @@ public class KeycloakController {
         // TODO: 18.4.21. Credential validation
         if (userCredentials == null || userCredentials.getPassword() == null || userCredentials.getPassword().equals("")
                 || userCredentials.getUsername() == null || userCredentials.getUsername().equals("")) {
-
-            return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+            throw new WrongCredentialsException("Username or password you applied is not correct. Please try again.");
         }
 
         TokenDto responseToken;

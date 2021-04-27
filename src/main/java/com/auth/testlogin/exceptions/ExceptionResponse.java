@@ -1,7 +1,7 @@
 package com.auth.testlogin.exceptions;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
-import org.springframework.http.HttpStatus;
 
 import java.util.Date;
 
@@ -11,6 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class ExceptionResponse {
+
     private Date timeStamp;
     private String message;
     private String details;

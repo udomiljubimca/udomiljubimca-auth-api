@@ -40,6 +40,11 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     @Autowired
     private RestTemplate restTemplate;
 
+    /**
+     * Getting token for particular user and getting user info within response
+     *
+     *  @param userCredentials username and password from body
+     */
     public TokenDto getToken(UserCredentials userCredentials, ServletRequest request) {
 
         TokenDto tokenDto;
@@ -51,10 +56,8 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             mapForm.add("password", userCredentials.getPassword());
             mapForm.add("client_secret", SECRETKEY);
 
-            //get token
             tokenDto = exchange(mapForm);
 
-            //get user info by access token
             if (tokenDto != null) {
                 tokenDto.setUserInfo(getUserInfo(tokenDto.getAccessToken()));
             }
@@ -65,6 +68,11 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         }
     }
 
+    /**
+     * Getting user info: id (sub), email_verified, preferred_username
+     *
+     * @param token user token form Authorization header
+     */
     public UserInfoDto getUserInfo(String token) {
 
         if (token == null) {
@@ -83,6 +91,11 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         return userInfoDto;
     }
 
+    /**
+     * Getting token using refresh token, old token will be usable until expiration time
+     *
+     * @param refreshToken refresh token
+     */
     public TokenDto getByRefreshToken(String refreshToken) {
         TokenDto tokenDto;
         try {
@@ -104,7 +117,11 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         return tokenDto;
     }
 
-    // after logout user from the keycloak system. No new access token will be issued
+    /**
+     * Logout user using refresh token, and invalidate tokens
+     *
+     * @param refreshToken refresh token
+     */
     public void logoutUser(String refreshToken) {
 
         try {
@@ -127,7 +144,13 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         }
     }
 
-    // Reset passowrd
+    /**
+     * Reset password to logged user
+     *
+     * @param resetPasswordDto model which need to be converted in CredentialRepresentation
+     * @param token access token
+     * @param userId userId which want to reset password
+     */
     public void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -142,11 +165,15 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             restTemplate.put(AUTHURL + "/admin/realms/" + REALM + "/users/" + userId + "/reset-password",
                     entity);
         } catch (Exception e) {
-            throw new TokenNotValidException("Something went wrong, please log out and try to login again! Check token adn userId!");
+            throw new TokenNotValidException("Something went wrong, please log out and try to login again! Check token validation and userId!");
         }
     }
 
-    // New method for exchange using Rest Template
+    /**
+     * Method exchange data with Keycloak and getting Token response
+     *
+     * @param mapForm provided data for exchange
+     */
     private TokenDto exchange(MultiValueMap<String, String> mapForm) {
 
         TokenDto tokenDto = new TokenDto();

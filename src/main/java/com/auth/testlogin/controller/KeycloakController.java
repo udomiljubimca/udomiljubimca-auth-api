@@ -20,25 +20,24 @@ import javax.servlet.http.HttpServletRequest;
  * @version 1.0
  */
 @RestController
-@RequestMapping(value = "/keycloak")
+@RequestMapping(value = "/")
 public class KeycloakController {
 
     @Autowired
     KeyCloakService keyClockService;
 
-    /*
+    /**
      * Get token for the first time when user log in. We need to pass
      * credentials only once. Later communication will be done by sending token.
      */
-    @RequestMapping(value = "/token", method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     @Loggable
     public ApiResponse getTokenUsingCredentials(@RequestBody UserCredentials userCredentials, ServletRequest request) {
 
-        ApiResponse apiResponse = new ApiResponse();
         TokenDto responseToken;
 
         if (request == null) {
-            throw new WrongUserCredentialsException("Bad request!");
+            return new ApiResponse(new WrongUserCredentialsException("Bad request!"));
         }
         if (userCredentials == null){
             throw new WrongUserCredentialsException("Bad request!");
@@ -46,19 +45,17 @@ public class KeycloakController {
 
         responseToken = keyClockService.getToken(userCredentials, request);
 
-        apiResponse.setData(responseToken);
-
-        return apiResponse;
+        return new ApiResponse(responseToken);
 
     }
-    /*
+    /**
      * When access token get expired than send refresh token to get new access
      * token. We will receive new refresh token also in this response.Update
      * client cookie with updated refresh and access token
      */
     @RequestMapping(value = "/refreshtoken", method = RequestMethod.GET)
     @Loggable
-    public ResponseEntity<?> getTokenUsingRefreshToken(HttpServletRequest request) {
+    public ApiResponse getTokenUsingRefreshToken(HttpServletRequest request) {
 
         TokenDto responseToken;
 
@@ -69,7 +66,7 @@ public class KeycloakController {
 
         responseToken = keyClockService.getByRefreshToken(header);
 
-        return new ResponseEntity<>(responseToken, HttpStatus.OK);
+        return new ApiResponse(responseToken);
 
 
     }

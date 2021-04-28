@@ -1,16 +1,21 @@
 package com.auth.testlogin.controller;
 
+import com.auth.testlogin.config.ApiResponse;
+import com.auth.testlogin.exceptions.ExceptionResponse;
 import com.auth.testlogin.exceptions.WrongCredentialsException;
 import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.service.KeyCloakServiceImpl;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletRequest;
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -31,24 +36,25 @@ public class KeycloakController {
     // TODO: Important for Exception Handlers !
     @RequestMapping(value = "/token", method = RequestMethod.POST)
     @Loggable
-    public ResponseEntity<?> getTokenUsingCredentials(@RequestBody UserCredentials userCredentials, ServletRequest request)
+    public ApiResponse getTokenUsingCredentials(@RequestBody UserCredentials userCredentials, ServletRequest request)
             throws Exception {
+
+        ApiResponse apiResponse = new ApiResponse();
 
         if (request == null) {
             // TODO: 18.4.21. Return malformed JSON request
-            return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+            throw new WrongCredentialsException("Malformated Json");
         }
 
-        if (userCredentials == null || userCredentials.getPassword() == null || userCredentials.getPassword().equals("")
-                || userCredentials.getUsername() == null || userCredentials.getUsername().equals("")) {
-            throw new WrongCredentialsException("Username or password you applied is not correct. Please try again.");
-        }
 
         TokenDto responseToken;
 
+        //set token
         responseToken = keyClockService.getToken(userCredentials, request);
         // TODO: 18.4.21. Generic API response
-        return new ResponseEntity<>(responseToken, HttpStatus.OK);
+        // set Api Response
+        apiResponse.setData(responseToken);
+        return apiResponse;
 
     }
 
@@ -62,6 +68,8 @@ public class KeycloakController {
     public ResponseEntity<?> getTokenUsingRefreshToken(@RequestHeader(value = "Authorization") String refreshToken) {
 
         TokenDto responseToken;
+
+
         try {
             responseToken = keyClockService.getByRefreshToken(refreshToken);
             // TODO: 26.4.21. Catch our exceptions
@@ -71,5 +79,7 @@ public class KeycloakController {
         }
         return new ResponseEntity<>(responseToken, HttpStatus.OK);
 
+
     }
+
 }

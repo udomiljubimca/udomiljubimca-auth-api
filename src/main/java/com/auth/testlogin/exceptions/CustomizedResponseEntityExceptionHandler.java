@@ -1,9 +1,7 @@
 package com.auth.testlogin.exceptions;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,12 +17,13 @@ import java.util.Date;
 @RestController
 public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
+
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
         ex.printStackTrace();
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(),
-                        request.getDescription(false));
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
 
        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -33,8 +32,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     public final ResponseEntity<Object> handleUserNotFoundException(WrongCredentialsException ex, WebRequest request) {
         ex.printStackTrace();
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(),
-                         request.getDescription(false));
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }

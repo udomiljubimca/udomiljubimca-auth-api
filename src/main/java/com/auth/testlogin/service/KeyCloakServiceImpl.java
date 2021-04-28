@@ -160,7 +160,9 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         // TODO: 18.4.21. Response model mapping
         try {
             response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
+
         } catch (Exception e) {
+
             throw new WrongCredentialsException(e.getMessage());
         }
         LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();

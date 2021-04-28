@@ -1,5 +1,6 @@
 package com.auth.testlogin.controller;
 
+import com.auth.testlogin.exceptions.WrongUserCredentialsException;
 import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.service.KeyCloakService;
@@ -9,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.NotAuthorizedException;
-import java.util.Optional;
 
 /**
  * @author Djordje
@@ -30,7 +29,7 @@ public class UserController {
 	public ResponseEntity<?> logoutUser(HttpServletRequest request) {
 
 		if (request == null) {
-			return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+			throw new WrongUserCredentialsException("Bad request!");
 		}
 
 		String header = request.getHeader("Authorization");
@@ -48,19 +47,19 @@ public class UserController {
 											@RequestBody ResetPasswordDto resetPasswordDto) {
 
 		if (request == null) {
-			return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+			throw new WrongUserCredentialsException("Bad request!");
 		}
 		if (userId == null) {
-			return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+			throw new WrongUserCredentialsException("User Id not present!");
 		}
 		if (resetPasswordDto == null || (!resetPasswordDto.getPassword().equals(resetPasswordDto.getConfirm()))) {
-			return ResponseEntity.of(Optional.of(HttpStatus.BAD_REQUEST));
+			throw new WrongUserCredentialsException("Password are not the same!");
 		}
 
 		String header = request.getHeader("Authorization");
 
 		if (header == null || !header.startsWith("Bearer ")) {
-			throw new NotAuthorizedException("No JWT token found in request headers");
+			throw new WrongUserCredentialsException("No JWT token found in request headers");
 		}
 		String authToken = header.substring(7);
 

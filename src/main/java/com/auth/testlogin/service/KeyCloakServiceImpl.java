@@ -1,6 +1,7 @@
 package com.auth.testlogin.service;
 
-import com.auth.testlogin.exceptions.WrongCredentialsException;
+import com.auth.testlogin.exceptions.WrongUserCredentialsException;
+import com.auth.testlogin.exceptions.TokenNotValidException;
 import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
@@ -39,7 +40,6 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     @Autowired
     private RestTemplate restTemplate;
 
-    // Get Token
     public TokenDto getToken(UserCredentials userCredentials, ServletRequest request) {
 
         TokenDto tokenDto;
@@ -52,22 +52,24 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             mapForm.add("client_secret", SECRETKEY);
 
             //get token
-            System.out.println("get token");
             tokenDto = exchange(mapForm);
 
             //get user info by access token
-            System.out.println("user info");
             if (tokenDto != null) {
                 tokenDto.setUserInfo(getUserInfo(tokenDto.getAccessToken()));
             }
             return tokenDto;
 
         } catch (Exception e) {
-            throw new WrongCredentialsException("Credentials are not valid, please try again!");
+            throw new WrongUserCredentialsException("Wrong credentials, please try again!");
         }
     }
 
     public UserInfoDto getUserInfo(String token) {
+
+        if (token == null) {
+            throw new TokenNotValidException("Cannot load user info because token is not present!");
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
@@ -82,7 +84,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     }
 
     public TokenDto getByRefreshToken(String refreshToken) {
-        TokenDto tokenDto = null;
+        TokenDto tokenDto;
         try {
             MultiValueMap<String, String> mapForm = new LinkedMultiValueMap<>();
             mapForm.add("client_id", CLIENTID);
@@ -97,7 +99,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new TokenNotValidException("Refresh token is not present or not valid! Please login again.");
         }
         return tokenDto;
     }
@@ -121,29 +123,27 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             restTemplate.postForEntity(url, request, Object.class);
 
         } catch (Exception e) {
-            throw e;
+            throw new TokenNotValidException("Error while logout user, provided refresh token is not valid!");
         }
     }
 
     // Reset passowrd
     public void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + token);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            CredentialRepresentation cr = new CredentialRepresentation();
+            cr.setType(CredentialRepresentation.PASSWORD);
+            cr.setTemporary(false);
+            cr.setValue(resetPasswordDto.getPassword());
+            HttpEntity<CredentialRepresentation> entity = new HttpEntity<>(cr, headers);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + token);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        CredentialRepresentation cr = new CredentialRepresentation();
-        cr.setType(CredentialRepresentation.PASSWORD);
-        cr.setTemporary(false);
-        cr.setValue(resetPasswordDto.getPassword());
-        HttpEntity<CredentialRepresentation> entity = new HttpEntity<>(cr, headers);
-
-        // Test purpose
-        // String fedUserId = getUserInfo(token).getSub();
-
-        restTemplate.put(AUTHURL + "/admin/realms/" + REALM + "/users/" + userId + "/reset-password",
-                entity
-        );
-
+            restTemplate.put(AUTHURL + "/admin/realms/" + REALM + "/users/" + userId + "/reset-password",
+                    entity);
+        } catch (Exception e) {
+            throw new TokenNotValidException("Something went wrong, please log out and try to login again! Check token adn userId!");
+        }
     }
 
     // New method for exchange using Rest Template
@@ -157,14 +157,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
 
-        // TODO: 18.4.21. Response model mapping
-        try {
-            response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
-
-        } catch (Exception e) {
-
-            throw new WrongCredentialsException(e.getMessage());
-        }
+        response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
         LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
 
         if (map != null) {

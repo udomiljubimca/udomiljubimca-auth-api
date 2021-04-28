@@ -1,22 +1,19 @@
 package com.auth.testlogin.controller;
 
 import com.auth.testlogin.config.ApiResponse;
-import com.auth.testlogin.exceptions.ExceptionResponse;
-import com.auth.testlogin.exceptions.WrongCredentialsException;
+import com.auth.testlogin.exceptions.TokenNotValidException;
+import com.auth.testlogin.exceptions.WrongUserCredentialsException;
 import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.TokenDto;
-import com.auth.testlogin.service.KeyCloakServiceImpl;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import org.json.simple.parser.ParseException;
+import com.auth.testlogin.service.KeyCloakService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletRequest;
-import java.io.IOException;
-import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Djordje
@@ -27,37 +24,33 @@ import java.util.Optional;
 public class KeycloakController {
 
     @Autowired
-    KeyCloakServiceImpl keyClockService;
+    KeyCloakService keyClockService;
 
     /*
      * Get token for the first time when user log in. We need to pass
      * credentials only once. Later communication will be done by sending token.
      */
-    // TODO: Important for Exception Handlers !
     @RequestMapping(value = "/token", method = RequestMethod.POST)
     @Loggable
-    public ApiResponse getTokenUsingCredentials(@RequestBody UserCredentials userCredentials, ServletRequest request)
-            throws Exception {
+    public ApiResponse getTokenUsingCredentials(@RequestBody UserCredentials userCredentials, ServletRequest request) {
 
         ApiResponse apiResponse = new ApiResponse();
-
-        if (request == null) {
-            // TODO: 18.4.21. Return malformed JSON request
-            throw new WrongCredentialsException("Malformated Json");
-        }
-
-
         TokenDto responseToken;
 
-        //set token
+        if (request == null) {
+            throw new WrongUserCredentialsException("Bad request!");
+        }
+        if (userCredentials == null){
+            throw new WrongUserCredentialsException("Bad request!");
+        }
+
         responseToken = keyClockService.getToken(userCredentials, request);
-        // TODO: 18.4.21. Generic API response
-        // set Api Response
+
         apiResponse.setData(responseToken);
+
         return apiResponse;
 
     }
-
     /*
      * When access token get expired than send refresh token to get new access
      * token. We will receive new refresh token also in this response.Update
@@ -65,18 +58,17 @@ public class KeycloakController {
      */
     @RequestMapping(value = "/refreshtoken", method = RequestMethod.GET)
     @Loggable
-    public ResponseEntity<?> getTokenUsingRefreshToken(@RequestHeader(value = "Authorization") String refreshToken) {
+    public ResponseEntity<?> getTokenUsingRefreshToken(HttpServletRequest request) {
 
         TokenDto responseToken;
 
-
-        try {
-            responseToken = keyClockService.getByRefreshToken(refreshToken);
-            // TODO: 26.4.21. Catch our exceptions
-        } catch (Exception e) {
-
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        String header = request.getHeader("Authorization");
+        if(header == null){
+            throw new TokenNotValidException("Refresh token is not present!");
         }
+
+        responseToken = keyClockService.getByRefreshToken(header);
+
         return new ResponseEntity<>(responseToken, HttpStatus.OK);
 
 

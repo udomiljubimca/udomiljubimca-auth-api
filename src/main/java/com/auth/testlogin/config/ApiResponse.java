@@ -1,18 +1,28 @@
 package com.auth.testlogin.config;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 
 
+@Data
+@Builder
 @AllArgsConstructor
-@ToString
-@Getter
-@Setter
+@ApiModel(description = "ApiResponse details")
 public class ApiResponse {
 
+    /**
+     * response status
+     */
+    @ApiModelProperty(value="Response status ex: 200, 401, 404")
     private Integer status;
+
+    /**
+     * response data
+     */
+    @ApiModelProperty(value="Response data")
     private Object data;
-    private Object error;
 
     public ApiResponse() {
         this.status = HttpStatus.OK.value();

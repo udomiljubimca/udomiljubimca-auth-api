@@ -1,21 +1,35 @@
 package com.auth.testlogin.exceptions;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Data
+@Builder
 @NoArgsConstructor
-@ToString
-@Getter
-@Setter
+@AllArgsConstructor
+@ApiModel(description = "ApiException details")
 public class ApiException {
 
+    /**
+     * displays date and hour
+     */
+    @ApiModelProperty(value="Display of date and hour")
     private String timeStamp;
+
+    /**
+     * exception message
+     */
+    @ApiModelProperty(value="Display of exception message")
     private String message;
+
+    /**
+     * exception details
+     */
+    @ApiModelProperty(value="Display of exception details")
     private String details;
 
     public ApiException(Date timeStamp, String message, String details) {

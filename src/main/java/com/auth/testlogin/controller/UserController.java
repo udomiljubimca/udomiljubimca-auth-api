@@ -4,7 +4,10 @@ import com.auth.testlogin.config.ApiResponse;
 import com.auth.testlogin.exceptions.WrongUserCredentialsException;
 import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
+import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.service.KeyCloakService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +17,13 @@ import javax.servlet.http.HttpServletRequest;
  * @author Djordje
  * @version 1.0
  */
+
+/**
+ * User controller for Adopt a pet project
+ * Acceptance criterias:
+ * 1)user logout
+ * 2)user update password
+ */
 @RestController
 @RequestMapping(value = "/user")
 public class UserController {
@@ -21,7 +31,15 @@ public class UserController {
     @Autowired
     KeyCloakService keyCloakService;
 
+    /**
+     * 1) Logout route logs out user from application.
+     * Requires JWT token in header.
+     */
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    @ApiOperation(
+            notes="${operation3.description}",
+            value="${operation3.value}"
+    )
     @Loggable
     public ApiResponse logoutUser(HttpServletRequest request) {
 
@@ -37,9 +55,17 @@ public class UserController {
 
     }
 
+    /**
+     * 2) Update password route updates existing password for user.
+     * Requires userId, new password, confirm password and JWT token in header
+     */
     @RequestMapping(value = "/update/password", method = RequestMethod.POST)
+    @ApiOperation(
+            notes="${operation4.description}",
+            value="${operation4.value}"
+    )
     @Loggable
-    public ApiResponse updatePassword(HttpServletRequest request,
+    public ApiResponse updatePassword(@ApiParam(value = "UserId", required = true)HttpServletRequest request,
                                       @RequestParam(name = "userId") String userId,
                                       @RequestBody ResetPasswordDto resetPasswordDto) {
 
@@ -47,13 +73,13 @@ public class UserController {
             throw new WrongUserCredentialsException("Bad request!");
         }
         if (userId == null) {
-            throw new WrongUserCredentialsException("User Id not present!");
+            throw new WrongUserCredentialsException("UserId is not present!");
         }
         if (resetPasswordDto == null){
-            throw new WrongUserCredentialsException("Body not present!");
+            throw new WrongUserCredentialsException("Body is not present!");
         }
         if (!resetPasswordDto.getPassword().equals(resetPasswordDto.getConfirm())) {
-            throw new WrongUserCredentialsException("Password are not the same!");
+            throw new WrongUserCredentialsException("Provided passwords are not the same!");
         }
 
         String header = request.getHeader("Authorization");

@@ -7,6 +7,10 @@ import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.service.KeyCloakService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ResponseHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,13 @@ import javax.servlet.http.HttpServletRequest;
  * @author Djordje
  * @version 1.0
  */
+
+/**
+ * Keycloak controller for Adopt a pet project
+ * Acceptance criterias:
+ * 1)get token for the first time when user log in
+ * 2)get new access token.
+ */
 @RestController
 @RequestMapping(value = "/")
 public class KeycloakController {
@@ -27,10 +38,16 @@ public class KeycloakController {
     KeyCloakService keyClockService;
 
     /**
-     * Get token for the first time when user log in. We need to pass
+     * 1) Get token for the first time when user log in. We need to pass
      * credentials only once. Later communication will be done by sending token.
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @ApiOperation(
+            notes="${operation1.description}",
+            value="${operation1.value}",
+            responseContainer="${operation1.responseContainer}",
+            response = TokenDto.class
+    )
     @Loggable
     public ApiResponse getTokenUsingCredentials(@RequestBody UserCredentials userCredentials, ServletRequest request) {
 
@@ -49,11 +66,17 @@ public class KeycloakController {
 
     }
     /**
-     * When access token get expired than send refresh token to get new access
+     * 2) When access token get expired than send refresh token to get new access
      * token. We will receive new refresh token also in this response.Update
      * client cookie with updated refresh and access token
      */
     @RequestMapping(value = "/refreshtoken", method = RequestMethod.GET)
+    @ApiOperation(
+            notes="${operation2.description}",
+            value="${operation2.value}",
+            responseContainer="${operation2.responseContainer}",
+            response = TokenDto.class
+    )
     @Loggable
     public ApiResponse getTokenUsingRefreshToken(HttpServletRequest request) {
 
@@ -67,7 +90,6 @@ public class KeycloakController {
         responseToken = keyClockService.getByRefreshToken(header);
 
         return new ApiResponse(responseToken);
-
 
     }
 

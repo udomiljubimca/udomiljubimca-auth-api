@@ -1,32 +1,35 @@
 package com.auth.testlogin.model.dto;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ApiModel(description = "${TokenDto.description}")
 public class UserInfoDto {
 
+    /**
+     * unique user number
+     */
+    @ApiModelProperty(value="${TokenDto.sub}")
     String sub;
+
+    /**
+     * user verified email
+     */
+    @ApiModelProperty(value="${TokenDto.email_verified}")
     Boolean email_verified;
+
+    /**
+     * user username
+     */
+    @ApiModelProperty(value="${TokenDto.email_verified}")
     String preferred_username;
 
-    public String getSub() {
-        return sub;
-    }
-
-    public void setSub(String sub) {
-        this.sub = sub;
-    }
-
-    public Boolean getEmail_verified() {
-        return email_verified;
-    }
-
-    public void setEmail_verified(Boolean email_verified) {
-        this.email_verified = email_verified;
-    }
-
-    public String getPreferred_username() {
-        return preferred_username;
-    }
-
-    public void setPreferred_username(String preferred_username) {
-        this.preferred_username = preferred_username;
-    }
 }

@@ -89,7 +89,8 @@ public class UserController {
         }
         String authToken = header.substring(7);
 
-        keyCloakService.resetPassword(resetPasswordDto, authToken, userId);
+        // TODO: 29.4.21. Test this new method for update password, token is not required?!
+        keyCloakService.resetPasswordFromAdmin(resetPasswordDto.getPassword(), userId);
 
         return new ApiResponse("Your password has been successfully updated!");
 

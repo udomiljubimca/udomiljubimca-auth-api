@@ -6,6 +6,11 @@ import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.model.dto.UserInfoDto;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -197,5 +202,33 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             return null;
         }
         return tokenDto;
+    }
+    //Create Admin from KeycloakBuilder and get User resource
+    private UsersResource getKeycloakUserResource() {
+
+        // TODO: 29.4.21. Add those values (username, password ...) in application.properties
+        Keycloak kc = KeycloakBuilder.builder().serverUrl(AUTHURL).realm("master").username("admin").password("admin")
+                .clientId("admin-cli").resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
+                .build();
+
+        RealmResource realmResource = kc.realm(REALM);
+
+        return realmResource.users();
+    }
+
+    // Reset password using Admin
+    public void resetPasswordFromAdmin(String newPassword, String userId) {
+
+        UsersResource userResource = getKeycloakUserResource();
+
+        // Define password credential
+        CredentialRepresentation passwordCred = new CredentialRepresentation();
+        passwordCred.setTemporary(false);
+        passwordCred.setType(CredentialRepresentation.PASSWORD);
+        passwordCred.setValue(newPassword.trim());
+
+        // Set password credential
+        userResource.get(userId).resetPassword(passwordCred);
+
     }
 }

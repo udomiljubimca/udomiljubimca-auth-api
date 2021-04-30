@@ -95,10 +95,20 @@ public class KeyCloakServiceImpl implements KeyCloakService {
 
         HttpEntity<String> entity = new HttpEntity<>(token, headers);
 
-        UserInfoDto userInfoDto = restTemplate.exchange(
+        ResponseEntity<Object> response = restTemplate.exchange(
                 AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/userinfo",
-                HttpMethod.GET, entity, UserInfoDto.class).getBody();
+                HttpMethod.GET, entity, Object.class);
 
+        LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
+
+        UserInfoDto userInfoDto = new UserInfoDto();
+        if (map != null) {
+            userInfoDto.setSub(map.get("sub").toString());
+            userInfoDto.setEmail_verified(map.get("email_verified").toString().equalsIgnoreCase("true"));
+            userInfoDto.setPreferred_username(map.get("preferred_username").toString());
+        } else {
+            return null;
+        }
         return userInfoDto;
     }
 

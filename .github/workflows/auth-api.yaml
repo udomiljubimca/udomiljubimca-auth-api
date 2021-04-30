@@ -1,4 +1,4 @@
-name: Build/Push Auth API image to Docker Hub
+name: Build/Push Auth API image to Docker Hub.
 on:
   push:
     paths: './**'

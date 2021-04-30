@@ -42,6 +42,12 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     @Value("${keycloak.realm}")
     private String REALM;
 
+    @Value("${admin.username}")
+    private String ADMIN_USERNAME;
+
+    @Value("${admin.password}")
+    private String ADMIN_PASSWORD;
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -207,7 +213,9 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     private UsersResource getKeycloakUserResource() {
 
         // TODO: 29.4.21. Add those values (username, password ...) in application.properties
-        Keycloak kc = KeycloakBuilder.builder().serverUrl(AUTHURL).realm("master").username("admin").password("admin")
+        Keycloak kc = KeycloakBuilder.builder()
+                .serverUrl(AUTHURL).realm("master")
+                .username(ADMIN_USERNAME).password(ADMIN_PASSWORD)
                 .clientId("admin-cli").resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
                 .build();
 

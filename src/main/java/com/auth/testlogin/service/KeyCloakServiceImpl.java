@@ -75,7 +75,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             return tokenDto;
 
         } catch (Exception e) {
-            throw new WrongUserCredentialsException("Wrong credentials, please try again!");
+            throw new WrongUserCredentialsException(e.getMessage());
         }
     }
 

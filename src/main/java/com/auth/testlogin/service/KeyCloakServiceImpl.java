@@ -185,7 +185,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
      *
      * @param mapForm provided data for exchange
      */
-    private TokenDto exchange(MultiValueMap<String, String> mapForm) {
+    private TokenDto exchange(MultiValueMap<String, String> mapForm) throws Exception {
 
         TokenDto tokenDto = new TokenDto();
 
@@ -195,17 +195,21 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
 
-        response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
-        LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
+        try {
+            response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
+            LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
 
-        if (map != null) {
-            tokenDto.setAccessToken(map.get("access_token").toString());
-            tokenDto.setTokenType(map.get("token_type").toString());
-            tokenDto.setRefreshToken(map.get("refresh_token").toString());
-            tokenDto.setExpires_in(map.get("expires_in").toString());
-            tokenDto.setScope(map.get("scope").toString());
-        } else {
-            return null;
+            if (map != null) {
+                tokenDto.setAccessToken(map.get("access_token").toString());
+                tokenDto.setTokenType(map.get("token_type").toString());
+                tokenDto.setRefreshToken(map.get("refresh_token").toString());
+                tokenDto.setExpires_in(map.get("expires_in").toString());
+                tokenDto.setScope(map.get("scope").toString());
+            } else {
+                return null;
+            }
+        }catch (Exception e ){
+            throw new Exception(e.getMessage());
         }
         return tokenDto;
     }

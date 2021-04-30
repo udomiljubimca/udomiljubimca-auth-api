@@ -11,7 +11,7 @@ RUN groupadd -r app -g 1000 && useradd -u 1000 -r -g app -m -d /web-app -s /sbin
     chmod 755 /web-app
 RUN rm -rf /var/lib/apt/lists/*
 WORKDIR /web-app
-COPY --from=builder /build/target/auth-service-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY --from=builder /build/target/auth-service-0.0.1-SNAPSHOT.jar /web-app/app.jar
 EXPOSE 8080
 USER app
 CMD java -Dserver.port=8080 -jar app.jar

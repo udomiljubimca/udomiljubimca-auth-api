@@ -95,9 +95,9 @@ public class KeyCloakServiceImpl implements KeyCloakService {
 
         HttpEntity<String> entity = new HttpEntity<>(token, headers);
 
-        ResponseEntity<Object> response = restTemplate.exchange(
+        ResponseEntity<LinkedHashMap> response = restTemplate.exchange(
                 AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/userinfo",
-                HttpMethod.GET, entity, Object.class);
+                HttpMethod.GET, entity, LinkedHashMap.class);
 
         LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
 
@@ -199,14 +199,14 @@ public class KeyCloakServiceImpl implements KeyCloakService {
 
         TokenDto tokenDto = new TokenDto();
 
-        ResponseEntity<Object> response = null;
+        ResponseEntity<LinkedHashMap> response = null;
         String uri = AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/token";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
 
         try {
-            response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
+            response = restTemplate.exchange(uri, HttpMethod.POST, request, LinkedHashMap.class);
             LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
 
             if (map != null) {

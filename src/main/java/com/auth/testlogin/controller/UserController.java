@@ -4,7 +4,6 @@ import com.auth.testlogin.config.ApiResponse;
 import com.auth.testlogin.exceptions.WrongUserCredentialsException;
 import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
-import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.service.KeyCloakService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -37,8 +36,8 @@ public class UserController {
      */
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     @ApiOperation(
-            notes="${operation3.description}",
-            value="${operation3.value}"
+            notes = "${operation3.description}",
+            value = "${operation3.value}"
     )
     @Loggable
     public ApiResponse logoutUser(HttpServletRequest request) {
@@ -61,11 +60,11 @@ public class UserController {
      */
     @RequestMapping(value = "/update/password", method = RequestMethod.POST)
     @ApiOperation(
-            notes="${operation4.description}",
-            value="${operation4.value}"
+            notes = "${operation4.description}",
+            value = "${operation4.value}"
     )
     @Loggable
-    public ApiResponse updatePassword(@ApiParam(value = "UserId", required = true)HttpServletRequest request,
+    public ApiResponse updatePassword(@ApiParam(value = "UserId", required = true) HttpServletRequest request,
                                       @RequestParam(name = "userId") String userId,
                                       @RequestBody ResetPasswordDto resetPasswordDto) {
 
@@ -75,21 +74,25 @@ public class UserController {
         if (userId == null) {
             throw new WrongUserCredentialsException("UserId is not present!");
         }
-        if (resetPasswordDto == null){
+        if (resetPasswordDto == null) {
             throw new WrongUserCredentialsException("Body is not present!");
+        }
+        if (resetPasswordDto.getPassword().equalsIgnoreCase("") || resetPasswordDto.getConfirm().equalsIgnoreCase("")) {
+            throw new WrongUserCredentialsException("Password cannot be empty!");
         }
         if (!resetPasswordDto.getPassword().equals(resetPasswordDto.getConfirm())) {
             throw new WrongUserCredentialsException("Provided passwords are not the same!");
         }
 
-        String header = request.getHeader("Authorization");
+//        String header = request.getHeader("Authorization");
+//
+//        if (header == null || !header.startsWith("Bearer ")) {
+//            throw new WrongUserCredentialsException("No JWT token found in request headers");
+//        }
+//        String authToken = header.substring(7);
 
-        if (header == null || !header.startsWith("Bearer ")) {
-            throw new WrongUserCredentialsException("No JWT token found in request headers");
-        }
-        String authToken = header.substring(7);
-
-        keyCloakService.resetPassword(resetPasswordDto, authToken, userId);
+        // TODO: 29.4.21. Test this new method for update password, token is not required?!
+        keyCloakService.resetPasswordFromAdmin(resetPasswordDto.getPassword(), userId);
 
         return new ApiResponse("Your password has been successfully updated!");
 

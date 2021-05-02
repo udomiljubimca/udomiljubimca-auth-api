@@ -8,21 +8,14 @@ import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.service.KeyCloakService;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.ResponseHeader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-
-/**
- * @author Djordje
- * @version 1.0
- */
 
 /**
  * Keycloak controller for Adopt a pet project

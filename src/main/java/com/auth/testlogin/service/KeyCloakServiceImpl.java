@@ -6,6 +6,11 @@ import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.model.dto.UserInfoDto;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +42,12 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     @Value("${keycloak.realm}")
     private String REALM;
 
+    @Value("${admin.username}")
+    private String ADMIN_USERNAME;
+
+    @Value("${admin.password}")
+    private String ADMIN_PASSWORD;
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -64,7 +75,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             return tokenDto;
 
         } catch (Exception e) {
-            throw new WrongUserCredentialsException("Wrong credentials, please try again!");
+            throw new WrongUserCredentialsException(e.getMessage());
         }
     }
 
@@ -84,10 +95,20 @@ public class KeyCloakServiceImpl implements KeyCloakService {
 
         HttpEntity<String> entity = new HttpEntity<>(token, headers);
 
-        UserInfoDto userInfoDto = restTemplate.exchange(
+        ResponseEntity<Object> response = restTemplate.exchange(
                 AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/userinfo",
-                HttpMethod.GET, entity, UserInfoDto.class).getBody();
+                HttpMethod.GET, entity, Object.class);
 
+        LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
+
+        UserInfoDto userInfoDto = new UserInfoDto();
+        if (map != null) {
+            userInfoDto.setSub(map.get("sub").toString());
+            userInfoDto.setEmail_verified(map.get("email_verified").toString().equalsIgnoreCase("true"));
+            userInfoDto.setPreferred_username(map.get("preferred_username").toString());
+        } else {
+            return null;
+        }
         return userInfoDto;
     }
 
@@ -174,7 +195,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
      *
      * @param mapForm function parameter
      */
-    private TokenDto exchange(MultiValueMap<String, String> mapForm) {
+    private TokenDto exchange(MultiValueMap<String, String> mapForm) throws Exception {
 
         TokenDto tokenDto = new TokenDto();
 
@@ -185,18 +206,52 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
 
-        response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
-        LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
+        try {
+            response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
+            LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
 
-        if (map != null) {
-            tokenDto.setAccessToken(map.get("access_token").toString());
-            tokenDto.setTokenType(map.get("token_type").toString());
-            tokenDto.setRefreshToken(map.get("refresh_token").toString());
-            tokenDto.setExpires_in(map.get("expires_in").toString());
-            tokenDto.setScope(map.get("scope").toString());
-        } else {
-            return null;
+            if (map != null) {
+                tokenDto.setAccessToken(map.get("access_token").toString());
+                tokenDto.setTokenType(map.get("token_type").toString());
+                tokenDto.setRefreshToken(map.get("refresh_token").toString());
+                tokenDto.setExpires_in(map.get("expires_in").toString());
+                tokenDto.setScope(map.get("scope").toString());
+            } else {
+                return null;
+            }
+        }catch (Exception e ){
+            throw new Exception(e.getMessage());
         }
         return tokenDto;
+    }
+    //Create Admin from KeycloakBuilder and get User resource
+    private UsersResource getKeycloakUserResource() {
+
+        // TODO: 29.4.21. Add those values (username, password ...) in application.properties
+        Keycloak kc = KeycloakBuilder.builder()
+                .serverUrl(AUTHURL).realm("master")
+                .username(ADMIN_USERNAME).password(ADMIN_PASSWORD)
+                .clientId("admin-cli").resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
+                .build();
+
+        RealmResource realmResource = kc.realm(REALM);
+
+        return realmResource.users();
+    }
+
+    // Reset password using Admin
+    public void resetPasswordFromAdmin(String newPassword, String userId) {
+
+        UsersResource userResource = getKeycloakUserResource();
+
+        // Define password credential
+        CredentialRepresentation passwordCred = new CredentialRepresentation();
+        passwordCred.setTemporary(false);
+        passwordCred.setType(CredentialRepresentation.PASSWORD);
+        passwordCred.setValue(newPassword.trim());
+
+        // Set password credential
+        userResource.get(userId).resetPassword(passwordCred);
+
     }
 }

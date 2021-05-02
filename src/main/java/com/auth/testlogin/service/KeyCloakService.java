@@ -24,4 +24,6 @@ public interface KeyCloakService {
 
     void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId);
 
-}
+    void resetPasswordFromAdmin(String newPassword, String userId);
+
+    }

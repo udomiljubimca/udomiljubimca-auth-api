@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
  * 2)user update password
  */
 @RestController
-@RequestMapping(value = "/user")
+@RequestMapping(value = "/api/latest/auth-api/user")
 public class UserController {
 
     @Autowired

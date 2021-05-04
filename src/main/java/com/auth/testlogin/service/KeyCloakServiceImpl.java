@@ -113,7 +113,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     }
 
     /**
-     * Getting token using refresh token, old token will be usable until expiration time
+     * Getting token using refresh token, old token will be used until expiration time
      *
      * @param refreshToken refresh token
      */
@@ -166,11 +166,11 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     }
 
     /**
-     * Reset password to logged user
+     * Reset password for logged user
      *
-     * @param resetPasswordDto model which need to be converted in CredentialRepresentation
+     * @param resetPasswordDto model which needs to be converted in CredentialRepresentation
      * @param token access token
-     * @param userId userId which want to reset password
+     * @param userId ID of user who wants to reset password
      */
     public void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId) {
         try {
@@ -191,9 +191,9 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     }
 
     /**
-     * Method exchange data with Keycloak and getting Token response
+     * Method exchange, exchanges data with Keycloak and gets Token response
      *
-     * @param mapForm provided data for exchange
+     * @param mapForm function parameter
      */
     private TokenDto exchange(MultiValueMap<String, String> mapForm) throws Exception {
 
@@ -202,8 +202,8 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         ResponseEntity<Object> response = null;
         String uri = AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/token";
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
+
+        headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
 
         try {
             response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
@@ -226,7 +226,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     //Create Admin from KeycloakBuilder and get User resource
     private UsersResource getKeycloakUserResource() {
 
-        // TODO: 29.4.21. Add those values (username, password ...) in application.properties
+        // TODO: 29.4.21. Add those values (username, password ...) in application.yaml
         Keycloak kc = KeycloakBuilder.builder()
                 .serverUrl(AUTHURL).realm("master")
                 .username(ADMIN_USERNAME).password(ADMIN_PASSWORD)

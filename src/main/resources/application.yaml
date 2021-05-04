@@ -1,0 +1,77 @@
+server:
+port: 5555
+connection-timeout: 6000
+
+#==================Keycloak properties================
+keycloak:
+realm: devnation
+auth-server-url: http://localhost:8080/auth
+ssl-required: external
+#keycloak resource is the client ID
+resource: cloud-gateway
+#replace secret with your key
+credentials:
+secret: 6a78a7fe-7d5d-403c-8581-2129eba67975
+#The line below will prevent redirect to login page
+bearer-only: true
+
+my:
+greeting: application-properties
+
+admin:
+  username: admin
+  password: admin
+
+#==================Swagger2 properties================
+#KeycloakController properties
+
+#Login route
+operation1:
+  description: By providing user credentials receive JWT token
+  value: Returns token
+  responseContainer: Token
+
+#Refresh token route
+operation2:
+  description: By providing refresh token in authorization header receive token
+  value: Requires refresh token
+  responseContainer: JWT token
+
+#Logout route
+operation3:
+  description: Used to logout user. JWT token needs to be provided in header
+  value: Requires token
+
+#Update password route
+operation4:
+  description: Used to change/update existing user password
+  value: Requires userId, new password, confirm password
+
+#ResetPasswordDto properties
+ResetPasswordDto:
+  description: Reset password details
+  password: User new password
+  confirm: User confirm password
+
+#TokenDto properties
+TokenDto:
+  description: Token details
+  accessToken: Display of access token
+  tokenType: Display of token type ex; Bearer
+  refreshToken: Display of refresh token
+  expires_in: Display of token expiration
+  scope: Display of scope ex; openid email profile
+  userInfo: Display of user info object
+
+#UserInfoDto properties
+UserInfoDto:
+  description: User info details
+  sub: User unique Id
+  email_verified: User verified email
+  preferred_username: User username
+
+#UserCredentials properties
+UserCredentials:
+  description: User info details
+  password: User password
+  username: User username

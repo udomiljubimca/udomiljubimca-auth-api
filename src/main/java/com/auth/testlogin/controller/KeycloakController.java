@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
  * 2)get new access token.
  */
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/api/latest/auth-api")
 public class KeycloakController {
 
     @Autowired

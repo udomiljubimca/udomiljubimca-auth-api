@@ -15,6 +15,9 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static springfox.documentation.builders.PathSelectors.regex;
 import static com.google.common.base.Predicates.*;
 
@@ -25,11 +28,25 @@ public class SwaggerConfig {
 
     @Bean
     public Docket api() {
+
+        //Adding header
+        ParameterBuilder aParameterBuilder = new ParameterBuilder();
+        aParameterBuilder.name("Authorization")
+                .modelRef(new ModelRef("string"))
+                .parameterType("header")
+                .defaultValue("Bearer ")
+                .description("Please add 'Bearer ' before token, example: \n Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAi...")
+                .required(false)
+                .build();
+        List<Parameter> aParameters = new ArrayList<>();
+        aParameters.add(aParameterBuilder.build());
+
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.auth.testlogin"))
                 .paths(paths())
                 .build()
+                .globalOperationParameters(aParameters)
                 .apiInfo(apiInfo());
     }
 

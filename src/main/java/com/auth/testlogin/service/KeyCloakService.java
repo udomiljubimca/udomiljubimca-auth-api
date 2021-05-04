@@ -4,9 +4,6 @@ import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.model.dto.UserInfoDto;
-import org.keycloak.representations.idm.CredentialRepresentation;
-
-import javax.servlet.ServletRequest;
 
 /**
  * @author Djordje
@@ -14,7 +11,7 @@ import javax.servlet.ServletRequest;
  */
 public interface KeyCloakService {
 
-    TokenDto getToken(UserCredentials userCredentials, ServletRequest request);
+    TokenDto getToken(UserCredentials userCredentials);
 
     UserInfoDto getUserInfo(String token);
 
@@ -22,8 +19,6 @@ public interface KeyCloakService {
 
     void logoutUser(String userId);
 
-    void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId);
-
     void resetPasswordFromAdmin(String newPassword, String userId);
 
-    }
+}

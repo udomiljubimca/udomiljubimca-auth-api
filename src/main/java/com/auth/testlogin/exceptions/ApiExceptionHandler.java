@@ -12,7 +12,7 @@ import java.util.Date;
 
 /**
  * Applicable on all other controllers
- * */
+ */
 @ControllerAdvice
 @RestController
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
@@ -24,7 +24,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ApiException apiException =
                 new ApiException(new Date(), ex.getMessage(), request.getDescription(false));
 
-       return new ResponseEntity<>(apiException, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(apiException, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(WrongUserCredentialsException.class)
@@ -35,6 +35,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(apiException, HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(TokenNotValidException.class)
     public final ResponseEntity<Object> handleTokenNotValidException(TokenNotValidException ex, WebRequest request) {
         ex.printStackTrace();

@@ -13,11 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author Djordje
- * @version 1.0
- */
-
-/**
  * User controller for Adopt a pet project
  * Acceptance criterias:
  * 1)user logout
@@ -40,7 +35,7 @@ public class UserController {
             value = "${operation3.value}"
     )
     @Loggable
-    public ApiResponse logoutUser(HttpServletRequest request) {
+    public ApiResponse logoutUser(@RequestParam(name = "userId") String userId, HttpServletRequest request) {
 
         if (request == null) {
             throw new WrongUserCredentialsException("Bad request!");
@@ -48,7 +43,7 @@ public class UserController {
 
         String header = request.getHeader("Authorization");
 
-        keyCloakService.logoutUser(header);
+        keyCloakService.logoutUser(userId);
 
         return new ApiResponse("Hi!, you have logged out successfully!");
 
@@ -64,13 +59,10 @@ public class UserController {
             value = "${operation4.value}"
     )
     @Loggable
-    public ApiResponse updatePassword(@ApiParam(value = "UserId", required = true) HttpServletRequest request,
+    public ApiResponse updatePassword(@ApiParam(value = "UserId", required = true)
                                       @RequestParam(name = "userId") String userId,
                                       @RequestBody ResetPasswordDto resetPasswordDto) {
 
-        if (request == null) {
-            throw new WrongUserCredentialsException("Bad request!");
-        }
         if (userId == null) {
             throw new WrongUserCredentialsException("UserId is not present!");
         }
@@ -84,14 +76,6 @@ public class UserController {
             throw new WrongUserCredentialsException("Provided passwords are not the same!");
         }
 
-//        String header = request.getHeader("Authorization");
-//
-//        if (header == null || !header.startsWith("Bearer ")) {
-//            throw new WrongUserCredentialsException("No JWT token found in request headers");
-//        }
-//        String authToken = header.substring(7);
-
-        // TODO: 29.4.21. Test this new method for update password, token is not required?!
         keyCloakService.resetPasswordFromAdmin(resetPasswordDto.getPassword(), userId);
 
         return new ApiResponse("Your password has been successfully updated!");

@@ -1,7 +1,7 @@
 package com.auth.testlogin.service;
 
-import com.auth.testlogin.exceptions.WrongUserCredentialsException;
 import com.auth.testlogin.exceptions.TokenNotValidException;
+import com.auth.testlogin.exceptions.WrongUserCredentialsException;
 import com.auth.testlogin.model.UserCredentials;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
@@ -20,7 +20,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.ServletRequest;
 import java.util.LinkedHashMap;
 
 /**
@@ -54,9 +53,9 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     /**
      * Getting token for particular user and getting user info within response
      *
-     *  @param userCredentials username and password from body
+     * @param userCredentials username and password from body
      */
-    public TokenDto getToken(UserCredentials userCredentials, ServletRequest request) {
+    public TokenDto getToken(UserCredentials userCredentials) {
 
         TokenDto tokenDto;
         try {
@@ -87,27 +86,34 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     public UserInfoDto getUserInfo(String token) {
 
         if (token == null) {
-            throw new TokenNotValidException("Cannot load user info because token is not present!");
+            throw new TokenNotValidException("Cannot load user info because token is not present or valid!");
         }
+
+        UserInfoDto userInfoDto = new UserInfoDto();
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
 
         HttpEntity<String> entity = new HttpEntity<>(token, headers);
 
-        ResponseEntity<Object> response = restTemplate.exchange(
-                AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/userinfo",
-                HttpMethod.GET, entity, Object.class);
+        try {
+            ResponseEntity<Object> response = restTemplate.exchange(
+                    AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/userinfo",
+                    HttpMethod.GET, entity, Object.class);
 
-        LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
+            LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) response.getBody();
 
-        UserInfoDto userInfoDto = new UserInfoDto();
-        if (map != null) {
-            userInfoDto.setSub(map.get("sub").toString());
-            userInfoDto.setEmail_verified(map.get("email_verified").toString().equalsIgnoreCase("true"));
-            userInfoDto.setPreferred_username(map.get("preferred_username").toString());
-        } else {
-            return null;
+            if (map != null) {
+                userInfoDto.setSub(map.get("sub").toString());
+                userInfoDto.setEmail_verified(map.get("email_verified").toString().equalsIgnoreCase("true"));
+                userInfoDto.setPreferred_username(map.get("preferred_username").toString());
+                userInfoDto.setEmail(map.get("email").toString());
+                userInfoDto.setName(map.get("name").toString());
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            throw new WrongUserCredentialsException(e.getMessage());
         }
         return userInfoDto;
     }
@@ -118,7 +124,9 @@ public class KeyCloakServiceImpl implements KeyCloakService {
      * @param refreshToken refresh token
      */
     public TokenDto getByRefreshToken(String refreshToken) {
+
         TokenDto tokenDto;
+
         try {
             MultiValueMap<String, String> mapForm = new LinkedMultiValueMap<>();
             mapForm.add("client_id", CLIENTID);
@@ -141,8 +149,14 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     /**
      * Logout user using refresh token, and invalidate tokens
      *
-     * @param refreshToken refresh token
+     * @param userId user id
      */
+//    public void logoutUser(String userId){
+//
+//        UsersResource userResource = getKeycloakUserResource();
+//
+//        userResource.get(userId).logout();
+//    }
     public void logoutUser(String refreshToken) {
 
         try {
@@ -169,26 +183,26 @@ public class KeyCloakServiceImpl implements KeyCloakService {
      * Reset password for logged user
      *
      * @param resetPasswordDto model which needs to be converted in CredentialRepresentation
-     * @param token access token
-     * @param userId ID of user who wants to reset password
+     * @param token            access token
+     * @param userId           ID of user who wants to reset password
      */
-    public void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + token);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            CredentialRepresentation cr = new CredentialRepresentation();
-            cr.setType(CredentialRepresentation.PASSWORD);
-            cr.setTemporary(false);
-            cr.setValue(resetPasswordDto.getPassword());
-            HttpEntity<CredentialRepresentation> entity = new HttpEntity<>(cr, headers);
-
-            restTemplate.put(AUTHURL + "/admin/realms/" + REALM + "/users/" + userId + "/reset-password",
-                    entity);
-        } catch (Exception e) {
-            throw new TokenNotValidException("Something went wrong, please log out and try to login again! Check token validation and userId!");
-        }
-    }
+//    public void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId) {
+//        try {
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.set("Authorization", "Bearer " + token);
+//            headers.setContentType(MediaType.APPLICATION_JSON);
+//            CredentialRepresentation cr = new CredentialRepresentation();
+//            cr.setType(CredentialRepresentation.PASSWORD);
+//            cr.setTemporary(false);
+//            cr.setValue(resetPasswordDto.getPassword());
+//            HttpEntity<CredentialRepresentation> entity = new HttpEntity<>(cr, headers);
+//
+//            restTemplate.put(AUTHURL + "/admin/realms/" + REALM + "/users/" + userId + "/reset-password",
+//                    entity);
+//        } catch (Exception e) {
+//            throw new TokenNotValidException("Something went wrong, please log out and try to login again! Check token validation and userId!");
+//        }
+//    }
 
     /**
      * Method exchange, exchanges data with Keycloak and gets Token response
@@ -199,11 +213,12 @@ public class KeyCloakServiceImpl implements KeyCloakService {
 
         TokenDto tokenDto = new TokenDto();
 
-        ResponseEntity<Object> response = null;
+        ResponseEntity<Object> response;
         String uri = AUTHURL + "/realms/" + REALM + "/protocol/openid-connect/token";
         HttpHeaders headers = new HttpHeaders();
 
-        headers.setContentType(org.springframework.http.MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
+        headers.setContentType(MediaType.valueOf(String.valueOf(MediaType.APPLICATION_FORM_URLENCODED)));
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(mapForm, headers);
 
         try {
             response = restTemplate.exchange(uri, HttpMethod.POST, request, Object.class);
@@ -218,15 +233,35 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             } else {
                 return null;
             }
-        }catch (Exception e ){
+        } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
         return tokenDto;
     }
+
+    /**
+     * Method resetPasswordFromAdmin, reset password using Admin user
+     *
+     * @param newPassword new password
+     * @param userId      userId who wants reset
+     */
+    public void resetPasswordFromAdmin(String newPassword, String userId) {
+
+        UsersResource userResource = getKeycloakUserResource();
+
+        CredentialRepresentation passwordCred = new CredentialRepresentation();
+        passwordCred.setTemporary(false);
+        passwordCred.setType(CredentialRepresentation.PASSWORD);
+        passwordCred.setValue(newPassword.trim());
+
+        userResource.get(userId).resetPassword(passwordCred);
+
+    }
+
+
     //Create Admin from KeycloakBuilder and get User resource
     private UsersResource getKeycloakUserResource() {
 
-        // TODO: 29.4.21. Add those values (username, password ...) in application.yaml
         Keycloak kc = KeycloakBuilder.builder()
                 .serverUrl(AUTHURL).realm("master")
                 .username(ADMIN_USERNAME).password(ADMIN_PASSWORD)
@@ -238,19 +273,4 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         return realmResource.users();
     }
 
-    // Reset password using Admin
-    public void resetPasswordFromAdmin(String newPassword, String userId) {
-
-        UsersResource userResource = getKeycloakUserResource();
-
-        // Define password credential
-        CredentialRepresentation passwordCred = new CredentialRepresentation();
-        passwordCred.setTemporary(false);
-        passwordCred.setType(CredentialRepresentation.PASSWORD);
-        passwordCred.setValue(newPassword.trim());
-
-        // Set password credential
-        userResource.get(userId).resetPassword(passwordCred);
-
-    }
 }

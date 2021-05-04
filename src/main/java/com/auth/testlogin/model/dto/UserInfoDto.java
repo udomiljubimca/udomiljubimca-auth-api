@@ -17,19 +17,31 @@ public class UserInfoDto {
     /**
      * unique user number
      */
-    @ApiModelProperty(value="${TokenDto.sub}")
+    @ApiModelProperty(value = "${UserInfoDto.sub}")
     String sub;
 
     /**
      * user verified email
      */
-    @ApiModelProperty(value="${TokenDto.email_verified}")
+    @ApiModelProperty(value = "${UserInfoDto.email_verified}")
     Boolean email_verified;
 
     /**
      * user username
      */
-    @ApiModelProperty(value="${TokenDto.email_verified}")
+    @ApiModelProperty(value = "${UserInfoDto.preferred_username}")
     String preferred_username;
+
+    /**
+     * user email
+     */
+    @ApiModelProperty(value = "${UserInfoDto.preferred_username}")
+    String email;
+
+    /**
+     * user full name
+     */
+    @ApiModelProperty(value = "${UserInfoDto.preferred_username}")
+    String name;
 
 }

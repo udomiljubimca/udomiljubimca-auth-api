@@ -14,16 +14,16 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "${UserCredentials.description}")
 public class UserCredentials {
 
-	/**
-	 * user password
-	 */
-	@ApiModelProperty(value="${UserCredentials.password}")
-	private String password;
+    /**
+     * user password
+     */
+    @ApiModelProperty(value = "${UserCredentials.password}")
+    private String password;
 
-	/**
-	 * user username
-	 */
-	@ApiModelProperty(value="${UserCredentials.username}")
-	private String username;
+    /**
+     * user username
+     */
+    @ApiModelProperty(value = "${UserCredentials.username}")
+    private String username;
 
 }

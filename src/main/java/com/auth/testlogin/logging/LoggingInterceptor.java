@@ -1,5 +1,7 @@
 package com.auth.testlogin.logging;
 
+import com.auth.testlogin.config.ApiResponse;
+import com.auth.testlogin.model.dto.TokenDto;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -19,8 +21,12 @@ public class LoggingInterceptor {
     }
 
     @AfterReturning(value = "@annotation(com.auth.testlogin.logging.Loggable)", returning = "returnValue")
-    public void afterMethodExecution(JoinPoint joinPoint, Object returnValue) {
-        LoggerFactory.getLogger(joinPoint.getTarget().getClass()).info("Method-[{}] Input-{} Return-[{}]", joinPoint.getSignature(), joinPoint.getArgs(), returnValue);
+    public void afterMethodExecution(JoinPoint joinPoint, ApiResponse returnValue) throws NoSuchFieldException {
+        if (returnValue.getData().getClass().isInstance(new TokenDto())) {
+            LoggerFactory.getLogger(joinPoint.getTarget().getClass()).info("Method-[{}] Input-{} Return-[{}]", joinPoint.getSignature(), joinPoint.getArgs(), returnValue.toString().substring(0,50));
+        }else {
+            LoggerFactory.getLogger(joinPoint.getTarget().getClass()).info("Method-[{}] Input-{} Return-[{}]", joinPoint.getSignature(), joinPoint.getArgs(), returnValue);
+        }
     }
 
     @AfterThrowing(pointcut = "@annotation(com.auth.testlogin.logging.Loggable)", throwing = "ex")

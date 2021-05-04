@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -36,28 +35,32 @@ public class KeycloakController {
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ApiOperation(
-            notes="${operation1.description}",
-            value="${operation1.value}",
-            responseContainer="${operation1.responseContainer}",
+            notes = "${operation1.description}",
+            value = "${operation1.value}",
+            responseContainer = "${operation1.responseContainer}",
             response = TokenDto.class
     )
     @Loggable
-    public ApiResponse getTokenUsingCredentials(@RequestBody UserCredentials userCredentials, ServletRequest request) {
+    public ApiResponse getTokenUsingCredentials(@RequestBody UserCredentials userCredentials) {
 
         TokenDto responseToken;
 
-        if (request == null) {
-            return new ApiResponse(new WrongUserCredentialsException("Bad request!"));
-        }
-        if (userCredentials == null){
+        if (userCredentials == null) {
             throw new WrongUserCredentialsException("Bad request!");
         }
 
-        responseToken = keyClockService.getToken(userCredentials, request);
+        if (userCredentials.getUsername().equalsIgnoreCase("") ||
+                userCredentials.getPassword().equalsIgnoreCase("") ||
+                (userCredentials.getPassword().length() < 12)) {
+            throw new WrongUserCredentialsException("Invalid credentials!");
+        }
+
+        responseToken = keyClockService.getToken(userCredentials);
 
         return new ApiResponse(responseToken);
 
     }
+
     /**
      * 2) When access token get expired than send refresh token to get new access
      * token. We will receive new refresh token also in this response.Update
@@ -65,9 +68,9 @@ public class KeycloakController {
      */
     @RequestMapping(value = "/refreshtoken", method = RequestMethod.GET)
     @ApiOperation(
-            notes="${operation2.description}",
-            value="${operation2.value}",
-            responseContainer="${operation2.responseContainer}",
+            notes = "${operation2.description}",
+            value = "${operation2.value}",
+            responseContainer = "${operation2.responseContainer}",
             response = TokenDto.class
     )
     @Loggable
@@ -76,7 +79,7 @@ public class KeycloakController {
         TokenDto responseToken;
 
         String header = request.getHeader("Authorization");
-        if(header == null){
+        if (header == null) {
             throw new TokenNotValidException("Refresh token is not present!");
         }
 

@@ -17,12 +17,12 @@ public class ResetPasswordDto {
     /**
      * new password
      */
-    @ApiModelProperty(value="${ResetPasswordDto.password}")
+    @ApiModelProperty(value = "${ResetPasswordDto.password}")
     private String password;
 
     /**
      * password confirm
      */
-    @ApiModelProperty(value="${ResetPasswordDto.confirm}")
+    @ApiModelProperty(value = "${ResetPasswordDto.confirm}")
     private String confirm;
 }

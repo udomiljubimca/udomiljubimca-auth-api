@@ -17,36 +17,36 @@ public class TokenDto {
     /**
      * access token
      */
-    @ApiModelProperty(value="${TokenDto.accessToken}")
+    @ApiModelProperty(value = "${TokenDto.accessToken}")
     private String accessToken;
 
     /**
      * token type
      */
-    @ApiModelProperty(value="${TokenDto.tokenType}")
+    @ApiModelProperty(value = "${TokenDto.tokenType}")
     private String tokenType;
 
     /**
      * refresh token
      */
-    @ApiModelProperty(value="${TokenDto.refreshToken}")
+    @ApiModelProperty(value = "${TokenDto.refreshToken}")
     private String refreshToken;
 
     /**
      * token expiration
      */
-    @ApiModelProperty(value="${TokenDto.expires_in}")
+    @ApiModelProperty(value = "${TokenDto.expires_in}")
     private String expires_in;
 
     /**
      * scope
      */
-    @ApiModelProperty(value="${TokenDto.scope}")
+    @ApiModelProperty(value = "${TokenDto.scope}")
     private String scope;
 
     /**
      * user info object
      */
-    @ApiModelProperty(value="${TokenDto.userInfo}")
+    @ApiModelProperty(value = "${TokenDto.userInfo}")
     private UserInfoDto userInfo;
 }

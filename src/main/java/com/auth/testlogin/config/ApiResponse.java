@@ -2,7 +2,9 @@ package com.auth.testlogin.config;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 
 
@@ -15,13 +17,13 @@ public class ApiResponse {
     /**
      * response status
      */
-    @ApiModelProperty(value="Response status ex: 200, 401, 404")
+    @ApiModelProperty(value = "Response status ex: 200, 401, 404")
     private Integer status;
 
     /**
      * response data
      */
-    @ApiModelProperty(value="Response data")
+    @ApiModelProperty(value = "Response data")
     private Object data;
 
     public ApiResponse() {

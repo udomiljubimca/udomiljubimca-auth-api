@@ -56,7 +56,7 @@ public class UserController {
 
     /**
      * 2) Update password route updates existing password for user.
-     * Requires userId, new password, confirm password and JWT token in header
+     * Requires userId, new password, confirm password
      */
     @RequestMapping(value = "/update/password", method = RequestMethod.POST)
     @ApiOperation(

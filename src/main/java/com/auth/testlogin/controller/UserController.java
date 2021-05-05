@@ -1,6 +1,7 @@
 package com.auth.testlogin.controller;
 
 import com.auth.testlogin.config.ApiResponse;
+import com.auth.testlogin.exceptions.TokenNotValidException;
 import com.auth.testlogin.exceptions.WrongUserCredentialsException;
 import com.auth.testlogin.logging.Loggable;
 import com.auth.testlogin.model.dto.ResetPasswordDto;
@@ -14,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * User controller for Adopt a pet project
- * Acceptance criterias:
+ * Acceptance criteria:
  * 1)user logout
  * 2)user update password
  */
@@ -35,7 +36,7 @@ public class UserController {
             value = "${operation3.value}"
     )
     @Loggable
-    public ApiResponse logoutUser(@RequestParam(name = "userId") String userId, HttpServletRequest request) {
+    public ApiResponse logoutUser(HttpServletRequest request) {
 
         if (request == null) {
             throw new WrongUserCredentialsException("Bad request!");
@@ -43,7 +44,11 @@ public class UserController {
 
         String header = request.getHeader("Authorization");
 
-        keyCloakService.logoutUser(userId);
+        if (header == null) {
+            throw new TokenNotValidException("Refresh token not provided!");
+        }
+
+        keyCloakService.logoutUser(header);
 
         return new ApiResponse("Hi!, you have logged out successfully!");
 

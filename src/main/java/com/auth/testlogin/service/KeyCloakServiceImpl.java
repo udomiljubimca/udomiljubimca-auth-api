@@ -3,7 +3,6 @@ package com.auth.testlogin.service;
 import com.auth.testlogin.exceptions.TokenNotValidException;
 import com.auth.testlogin.exceptions.WrongUserCredentialsException;
 import com.auth.testlogin.model.UserCredentials;
-import com.auth.testlogin.model.dto.ResetPasswordDto;
 import com.auth.testlogin.model.dto.TokenDto;
 import com.auth.testlogin.model.dto.UserInfoDto;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -149,14 +148,8 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     /**
      * Logout user using refresh token, and invalidate tokens
      *
-     * @param userId user id
+     * @param refreshToken refresh token
      */
-//    public void logoutUser(String userId){
-//
-//        UsersResource userResource = getKeycloakUserResource();
-//
-//        userResource.get(userId).logout();
-//    }
     public void logoutUser(String refreshToken) {
 
         try {
@@ -180,29 +173,23 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     }
 
     /**
-     * Reset password for logged user
+     * Method resetPasswordFromAdmin, reset password using Admin user
      *
-     * @param resetPasswordDto model which needs to be converted in CredentialRepresentation
-     * @param token            access token
-     * @param userId           ID of user who wants to reset password
+     * @param newPassword new password
+     * @param userId      userId who wants reset
      */
-//    public void resetPassword(ResetPasswordDto resetPasswordDto, String token, String userId) {
-//        try {
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.set("Authorization", "Bearer " + token);
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//            CredentialRepresentation cr = new CredentialRepresentation();
-//            cr.setType(CredentialRepresentation.PASSWORD);
-//            cr.setTemporary(false);
-//            cr.setValue(resetPasswordDto.getPassword());
-//            HttpEntity<CredentialRepresentation> entity = new HttpEntity<>(cr, headers);
-//
-//            restTemplate.put(AUTHURL + "/admin/realms/" + REALM + "/users/" + userId + "/reset-password",
-//                    entity);
-//        } catch (Exception e) {
-//            throw new TokenNotValidException("Something went wrong, please log out and try to login again! Check token validation and userId!");
-//        }
-//    }
+    public void resetPasswordFromAdmin(String newPassword, String userId) {
+
+        UsersResource userResource = getKeycloakUserResource();
+
+        CredentialRepresentation passwordCred = new CredentialRepresentation();
+        passwordCred.setTemporary(false);
+        passwordCred.setType(CredentialRepresentation.PASSWORD);
+        passwordCred.setValue(newPassword.trim());
+
+        userResource.get(userId).resetPassword(passwordCred);
+
+    }
 
     /**
      * Method exchange, exchanges data with Keycloak and gets Token response
@@ -240,26 +227,8 @@ public class KeyCloakServiceImpl implements KeyCloakService {
     }
 
     /**
-     * Method resetPasswordFromAdmin, reset password using Admin user
-     *
-     * @param newPassword new password
-     * @param userId      userId who wants reset
+     * Method getKeycloakUserResource, Create Admin from KeycloakBuilder and get User resource
      */
-    public void resetPasswordFromAdmin(String newPassword, String userId) {
-
-        UsersResource userResource = getKeycloakUserResource();
-
-        CredentialRepresentation passwordCred = new CredentialRepresentation();
-        passwordCred.setTemporary(false);
-        passwordCred.setType(CredentialRepresentation.PASSWORD);
-        passwordCred.setValue(newPassword.trim());
-
-        userResource.get(userId).resetPassword(passwordCred);
-
-    }
-
-
-    //Create Admin from KeycloakBuilder and get User resource
     private UsersResource getKeycloakUserResource() {
 
         Keycloak kc = KeycloakBuilder.builder()

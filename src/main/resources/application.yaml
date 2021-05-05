@@ -6,12 +6,12 @@ keycloak:
   realm: devnation
   auth-server-url: http://localhost:8080/auth
   ssl-required: external
-#keycloak resource is the client ID
+  #keycloak resource is the client ID
   resource: cloud-gateway
-#replace secret with your key
+  #replace secret with your key
   credentials:
     secret: 9c67f378-d92a-4197-b284-0265ef6d1a7f
-#The line below will prevent redirect to login page
+  #The line below will prevent redirect to login page
   bearer-only: true
 
 my:
@@ -20,6 +20,20 @@ greeting: application-properties
 admin:
   username: admin
   password: admin
+
+#==================Spring actuator properties================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    metrics:
+      enabled: true
+    health:
+      show-details: always
+    beans:
+      enabled: true
 
 #==================Swagger2 properties================
 #KeycloakController properties

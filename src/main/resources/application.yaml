@@ -7,7 +7,7 @@ keycloak:
   auth-server-url: ${KEYCLOAK_URL_WITH_PATH:http://localhost:8080/auth}
   ssl-required: external
   #keycloak resource is the client ID
-  resource: cloud-gateway
+  resource: ${KEYCLOAK_CLIENT_NAME:cloud-gateway}
   #replace secret with your key
   credentials:
     secret: ${CLIENT_RELM_SECRET:9c67f378-d92a-4197-b284-0265ef6d1a7f}

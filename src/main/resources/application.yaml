@@ -50,8 +50,8 @@ operation2:
 
 #Logout route
 operation3:
-  description: Used to logout user. JWT token needs to be provided in header
-  value: Requires token
+  description: Used to logout user. JWT refresh token needs to be provided in header
+  value: Requires refresh token
 
 #Update password route
 operation4:

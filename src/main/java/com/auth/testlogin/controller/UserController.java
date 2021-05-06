@@ -74,7 +74,9 @@ public class UserController {
         if (resetPasswordDto == null) {
             throw new WrongUserCredentialsException("Body is not present!");
         }
-        if (resetPasswordDto.getPassword().equalsIgnoreCase("") || resetPasswordDto.getConfirm().equalsIgnoreCase("")) {
+        if (resetPasswordDto.getPassword().equalsIgnoreCase("")
+                || resetPasswordDto.getConfirm().equalsIgnoreCase("")) {
+
             throw new WrongUserCredentialsException("Password cannot be empty!");
         }
         if (!resetPasswordDto.getPassword().equals(resetPasswordDto.getConfirm())) {

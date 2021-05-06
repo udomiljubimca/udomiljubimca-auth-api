@@ -14,12 +14,10 @@ keycloak:
   #The line below will prevent redirect to login page
   bearer-only: true
 
-my:
-greeting: application-properties
-
+#Admin credentials, reading system env variables
 admin:
-  username: admin
-  password: admin
+  username: ${KEYCLOAK_ADMIN_USER}
+  password: ${KEYCLOAK_PASSWORD_DEV}
 
 #==================Spring actuator properties================
 management:

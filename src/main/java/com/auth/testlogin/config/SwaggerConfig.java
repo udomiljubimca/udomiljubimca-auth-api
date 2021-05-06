@@ -5,11 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.ParameterBuilder;
-import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
 import springfox.documentation.service.Parameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -18,8 +16,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Predicates.or;
 import static springfox.documentation.builders.PathSelectors.regex;
-import static com.google.common.base.Predicates.*;
 
 
 @Configuration
@@ -35,7 +33,7 @@ public class SwaggerConfig {
                 .modelRef(new ModelRef("string"))
                 .parameterType("header")
                 .defaultValue("Bearer ")
-                .description("Please add 'Bearer ' before token, example: \n Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAi...")
+                .description("Please add 'Bearer ' before token, example: \n 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAi...'")
                 .required(false)
                 .build();
         List<Parameter> aParameters = new ArrayList<>();
@@ -68,25 +66,25 @@ public class SwaggerConfig {
                 .build();
     }
 	/*
-@Bean
-public Docket api() {
-	//Adding Header
-	ParameterBuilder aParameterBuilder = new ParameterBuilder();
-	aParameterBuilder.name("Authorization")
-			.modelRef(new ModelRef("string"))
-			.parameterType("header")
-			.defaultValue("Bearer + token")
-			.required(true)
-			.build();
-	List<Parameter> aParameters = new ArrayList<>();
-	aParameters.add(aParameterBuilder.build());
-	return new Docket(DocumentationType.SWAGGER_2).select()
-			.apis(RequestHandlerSelectors
-					.any())
-			.paths(PathSelectors.any())
-			.build().
-					pathMapping("")
-			.globalOperationParameters(aParameters);
-}
-	 */
+        @Bean
+        public Docket api() {
+            //Adding Header
+            ParameterBuilder aParameterBuilder = new ParameterBuilder();
+            aParameterBuilder.name("Authorization")
+                    .modelRef(new ModelRef("string"))
+                    .parameterType("header")
+                    .defaultValue("Bearer + token")
+                    .required(true)
+                    .build();
+            List<Parameter> aParameters = new ArrayList<>();
+            aParameters.add(aParameterBuilder.build());
+            return new Docket(DocumentationType.SWAGGER_2).select()
+                    .apis(RequestHandlerSelectors
+                            .any())
+                    .paths(PathSelectors.any())
+                    .build().
+                            pathMapping("")
+                    .globalOperationParameters(aParameters);
+        }
+	 **/
 }

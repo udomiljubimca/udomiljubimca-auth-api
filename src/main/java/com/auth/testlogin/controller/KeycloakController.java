@@ -53,11 +53,14 @@ public class KeycloakController {
             throw new WrongUserCredentialsException("Bad request!");
         }
 
-        if (    userCredentials.getUsername().equalsIgnoreCase("")
-                || userCredentials.getPassword().equalsIgnoreCase("")
-                || (userCredentials.getPassword().length() < 12)) {
-
+        if (userCredentials.getUsername().equalsIgnoreCase("")
+                || userCredentials.getPassword().equalsIgnoreCase("")) {
             throw new WrongUserCredentialsException("Invalid credentials!");
+        }
+
+        if (userCredentials.getPassword().length() < 12) {
+
+            throw new WrongUserCredentialsException("Invalid password! Minimum 12 characters.");
         }
 
         responseToken = keyClockService.getToken(userCredentials);

@@ -73,7 +73,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             return tokenDto;
 
         } catch (Exception e) {
-            throw new WrongUserCredentialsException(e.getMessage());
+            throw new WrongUserCredentialsException("Wrong credentials, please try again!");
         }
     }
 
@@ -112,7 +112,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
                 return null;
             }
         } catch (Exception e) {
-            throw new TokenNotValidException(e.getMessage());
+            throw new TokenNotValidException("Please check your login! " + e.getMessage());
         }
         return userInfoDto;
     }
@@ -225,7 +225,7 @@ public class KeyCloakServiceImpl implements KeyCloakService {
                 return null;
             }
         } catch (Exception e) {
-            throw new WrongUserCredentialsException(e.getMessage());
+            throw new WrongUserCredentialsException("Something went wrong, please check credentials!");
         }
         return tokenDto;
     }

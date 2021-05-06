@@ -1,16 +1,16 @@
 server:
-  port: 5555
+  port: 8080
 
 #==================Keycloak properties================
 keycloak:
-  realm: devnation
-  auth-server-url: http://localhost:8080/auth
+  realm: ${CLIENT_RELM_NAME:devnation}
+  auth-server-url: ${KEYCLOAK_URL_WITH_PATH:http://localhost:8080/auth}
   ssl-required: external
   #keycloak resource is the client ID
   resource: cloud-gateway
   #replace secret with your key
   credentials:
-    secret: 9c67f378-d92a-4197-b284-0265ef6d1a7f
+    secret: ${CLIENT_RELM_SECRET:9c67f378-d92a-4197-b284-0265ef6d1a7f}
   #The line below will prevent redirect to login page
   bearer-only: true
 

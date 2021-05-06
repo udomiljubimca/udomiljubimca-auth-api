@@ -187,7 +187,11 @@ public class KeyCloakServiceImpl implements KeyCloakService {
         passwordCred.setType(CredentialRepresentation.PASSWORD);
         passwordCred.setValue(newPassword.trim());
 
-        userResource.get(userId).resetPassword(passwordCred);
+        try {
+            userResource.get(userId).resetPassword(passwordCred);
+        } catch (Exception e) {
+            throw new WrongUserCredentialsException("Admin credentials are not valid!");
+        }
 
     }
 
@@ -231,20 +235,14 @@ public class KeyCloakServiceImpl implements KeyCloakService {
      */
     private UsersResource getKeycloakUserResource() {
 
-        Keycloak kc;
-
-        try {
-            kc = KeycloakBuilder.builder()
-                    .serverUrl(AUTHURL)
-                    .realm("master")
-                    .username(ADMIN_USERNAME)
-                    .password(ADMIN_PASSWORD)
-                    .clientId("admin-cli")
-                    .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
-                    .build();
-        } catch (Exception e) {
-            throw new WrongUserCredentialsException("Admin credentials are not good!");
-        }
+        Keycloak kc = KeycloakBuilder.builder()
+                .serverUrl(AUTHURL)
+                .realm("master")
+                .username(ADMIN_USERNAME)
+                .password(ADMIN_PASSWORD)
+                .clientId("admin-cli")
+                .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
+                .build();
         RealmResource realmResource = kc.realm(REALM);
 
         return realmResource.users();

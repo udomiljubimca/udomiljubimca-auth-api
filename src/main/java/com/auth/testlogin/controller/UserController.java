@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  * 2)user update password
  */
 @RestController
-@RequestMapping(value = "/api/latest/auth-api/user")
+@RequestMapping(value = "/user")
 public class UserController {
 
     @Autowired

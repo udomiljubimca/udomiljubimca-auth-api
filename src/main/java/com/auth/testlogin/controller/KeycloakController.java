@@ -27,7 +27,7 @@ import java.util.Map;
  * 3)health check
  */
 @RestController
-@RequestMapping(value = "/api/latest/auth-api")
+@RequestMapping(value = "/")
 public class KeycloakController {
 
     @Autowired

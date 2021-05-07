@@ -82,6 +82,9 @@ public class UserController {
         if (!resetPasswordDto.getPassword().equals(resetPasswordDto.getConfirm())) {
             throw new WrongUserCredentialsException("Provided passwords are not the same!");
         }
+        if (resetPasswordDto.getPassword().length() < 12 || resetPasswordDto.getConfirm().length() < 12) {
+            throw new WrongUserCredentialsException("Password must contain minimum 12 characters!");
+        }
 
         keyCloakService.resetPasswordFromAdmin(resetPasswordDto.getPassword(), userId);
 

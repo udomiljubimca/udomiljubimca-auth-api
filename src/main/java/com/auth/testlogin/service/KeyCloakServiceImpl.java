@@ -17,6 +17,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.LinkedHashMap;
@@ -73,7 +74,9 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             return tokenDto;
 
         } catch (Exception e) {
-            throw new WrongUserCredentialsException("Wrong credentials, please try again!");
+
+            throw new WrongUserCredentialsException(e.getMessage());
+
         }
     }
 
@@ -224,8 +227,17 @@ public class KeyCloakServiceImpl implements KeyCloakService {
             } else {
                 return null;
             }
+        } catch (HttpClientErrorException.BadRequest e) {
+
+            throw new WrongUserCredentialsException("Check your email inbox and verify your account!");
+
+        } catch (HttpClientErrorException.Unauthorized e) {
+
+            throw new WrongUserCredentialsException("Wrong credentials!");
+
         } catch (Exception e) {
-            throw new WrongUserCredentialsException("Something went wrong, please check credentials!");
+
+            throw new Exception("Something went wrong, please try again!");
         }
         return tokenDto;
     }
